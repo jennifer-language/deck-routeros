@@ -156,14 +156,21 @@ export func update(c as Client, path as string, id as string, attrs as map of st
 /**
  * Find the first item under a path whose "name" property matches.
  *
+ * Filters server-side with a RouterOS `?name=` query word, so the router
+ * returns only the matching row(s) instead of the whole table.
+ *
  * @param {Client} c    an open client
  * @param {string} path RouterOS list path
  * @param {string} name the value of the "name" property to look for
  * @return {map of string to string} the item's properties, or an empty map when absent
  */
 export func findByName(c as Client, path as string, name as string) {
-    def rows as list of map of string to string init getAll($c, $path);
-    return findRowByField($rows, "name", $name);
+    def rows as list of map of string to string init mikrotik.printWhere($c.session, apiPath($path), ["?name=" + $name]);
+    if (len($rows) == 0) {
+        def empty as map of string to string init {};
+        return $empty;
+    }
+    return $rows[0];
 }
 
 /**

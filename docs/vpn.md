@@ -42,13 +42,13 @@ mt.kickPppUser($c, "alice"); # disconnect a session
 ## L2TP/IPsec — the easy one
 
 ```jennifer
-mt.enableLtwotpServer($c, "a long random ipsec secret");   # opens the firewall too
+mt.enableL2tpServer($c, "a long random ipsec secret");   # opens the firewall too
 mt.addVpnUser($c, "alice", "her password", "l2tp", "laptop");
 ```
 
 Clients enter: server = the router's public address or DNS name (see
 [cloud.md](cloud.md) for a name on a dynamic IP), the pre-shared key,
-and their username/password. `disableLtwotpServer($c)` turns it off and
+and their username/password. `disableL2tpServer($c)` turns it off and
 removes the firewall openings. Never enable L2TP without the IPsec
 secret — plain L2TP is cleartext (the helper refuses an empty secret).
 
@@ -72,7 +72,7 @@ OpenVPN is the most portable but needs a client config profile
 The router can also be the one dialing in to someone else's server:
 
 ```jennifer
-mt.addLtwotpClient($c, "l2tpto-hq", "vpn.example.org", "branch", "password");
+mt.addL2tpClient($c, "l2tpto-hq", "vpn.example.org", "branch", "password");
 mt.addSstpClient($c, "sstpto-hq", "vpn.example.org", "branch", "password");
 mt.addOvpnClient($c, "ovpnto-hq", "vpn.example.org", "branch", "password");
 ```
@@ -81,12 +81,12 @@ Each appears as an interface you can route or bridge.
 
 ## IKEv2 road-warrior (native clients, no L2TP layer)
 
-`setupIkevTwoServer` (ipsec topic) builds the mode-config (client address
+`setupIkev2Server` (ipsec topic) builds the mode-config (client address
 pool + DNS), a passive IKEv2 peer, and an EAP identity bound to your
 certificate:
 
 ```jennifer
-mt.setupIkevTwoServer($c, "roadwarriors", "router-le-cert",
+mt.setupIkev2Server($c, "roadwarriors", "router-le-cert",
     "10.200.0.10-10.200.0.200", "1.1.1.1");
 ```
 

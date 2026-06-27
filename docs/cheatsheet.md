@@ -336,18 +336,18 @@ shared PPP user DB, so add logins with `addVpnUser(…, "pppoe", …)`.
 database (`addVpnUser(c, name, password, service, comment)`,
 `vpnUsers(c)`, `removeVpnUser`, `pppActive(c)` for who is connected,
 `kickPppUser(c, name)`). Turn a server on, then add users:
-`enableLtwotpServer(c, ipsecSecret)` (L2TP/IPsec — native on every OS;
+`enableL2tpServer(c, ipsecSecret)` (L2TP/IPsec — native on every OS;
 opens IKE/NAT-T/ESP + udp 1701), `enableSstpServer(c, certificate,
 port)` (TLS on 443, crosses firewalls), `enableOvpnServer(c,
 certificate, port)` (OpenVPN); each with a `disable…Server(c)` that also
 removes its firewall openings, and TLS servers needing a certificate
-(certificates topic). Dial OUT with `addLtwotpClient` / `addSstpClient` /
+(certificates topic). Dial OUT with `addL2tpClient` / `addSstpClient` /
 `addOvpnClient(c, name, serverAddress, user, password)` (+ list/remove),
-and `setupIkevTwoServer(c, name, certificate, poolRange, dns)` for native
+and `setupIkev2Server(c, name, certificate, poolRange, dns)` for native
 IKEv2 road-warriors (ipsec topic).
 
 ```jennifer
-mt.enableLtwotpServer($c, "a long random ipsec secret");
+mt.enableL2tpServer($c, "a long random ipsec secret");
 mt.addVpnUser($c, "alice", "her password", "any", "field laptop");
 # clients dial the router's public address/name with that PSK + login
 ```
@@ -550,7 +550,7 @@ firewall accepts for IKE/NAT-T/ESP. Mirror the call on the far end
 of it. Status: `ipsecActive(c)` → `list of IpsecActivePeer` (computed
 `established`), `ipsecPolicies(c)` (per-policy `active` flag),
 `ipsecPeers(c)`. For native road-warrior clients (iOS/macOS/Windows
-IKEv2), `setupIkevTwoServer(c, name, certificate, poolRange, dns)` builds
+IKEv2), `setupIkev2Server(c, name, certificate, poolRange, dns)` builds
 the mode-config + passive peer + EAP identity + firewall — the most
 involved VPN to finish end-to-end (see the guide).
 
@@ -852,7 +852,7 @@ actions `ACTION_ACCEPT` / `ACTION_DROP` / `ACTION_REJECT`, NAT chains
 `IP_ADDRESS_PATH` / `IP_POOL_PATH` / `DHCP_SERVER_PATH` /
 `DHCP_NETWORK_PATH` / `DHCP_LEASE_PATH` / `DHCP_CLIENT_PATH` / `DHCP_RELAY_PATH` /
 `PPPOE_CLIENT_PATH` / `PPPOE_SERVER_PATH` / `PPP_SECRET_PATH` / `PPP_PROFILE_PATH` /
-`PPP_ACTIVE_PATH` / `LTWOTP_SERVER_PATH` / `LTWOTP_CLIENT_PATH` /
+`PPP_ACTIVE_PATH` / `L2TP_SERVER_PATH` / `L2TP_CLIENT_PATH` /
 `SSTP_SERVER_PATH` / `SSTP_CLIENT_PATH` / `OVPN_SERVER_PATH` /
 `OVPN_CLIENT_PATH` / `HOTSPOT_PATH` / `HOTSPOT_PROFILE_PATH` /
 `HOTSPOT_USER_PATH` / `HOTSPOT_ACTIVE_PATH` / `HOTSPOT_BINDING_PATH` /

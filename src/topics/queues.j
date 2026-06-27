@@ -169,12 +169,10 @@ func normalizedRate(rate as string) {
     if ($digits == "") {
         raiseError("\"" + $rate + "\" is not a rate - write it like \"10M\" or \"512k\"");
     }
-    if ($suffix == "k" or $suffix == "K") {
-        $suffix = "k";
-    } elseif ($suffix == "m" or $suffix == "M") {
-        $suffix = "M";
-    } elseif ($suffix == "g" or $suffix == "G") {
-        $suffix = "G";
+    match ($suffix) {
+        when "k", "K" { $suffix = "k"; }
+        when "m", "M" { $suffix = "M"; }
+        when "g", "G" { $suffix = "G"; }
     }
     return $digits + $suffix;
 }

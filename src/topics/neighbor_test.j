@@ -25,7 +25,7 @@ func testNeighborFromRow() {
     testing.assertEqual($n.version, "7.15.2");
 }
 
-func testNeighborFromLayerTwoRow() {
+func testNeighborFromLayer2Row() {
     def row as map of string to string init {
         "interface": "ether1",
         "mac-address": "AA:BB:CC:DD:EE:01",

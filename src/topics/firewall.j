@@ -473,20 +473,20 @@ func ensureProtocol(protocol as string) {
  *
  * @param {Client} c       an open client
  * @param {string} comment the rule's handle
- * @param {map of string to string} match extra match attributes
+ * @param {map of string to string} matchAttrs extra match attributes
  *        (protocol, dst-port, ...) merged onto chain=input action=accept
  * @internal
  */
-func ensureInputAccept(c as Client, comment as string, match as map of string to string) {
+func ensureInputAccept(c as Client, comment as string, matchAttrs as map of string to string) {
     def rows as list of map of string to string init getAll($c, FIREWALL_PATH);
     def existing as map of string to string init findRowByField($rows, "comment", $comment);
     if (len($existing) > 0) {
         return;
     }
     def attrs as map of string to string init {"chain": CHAIN_INPUT, "action": ACTION_ACCEPT, "comment": $comment};
-    def keys as list of string init maps.keys($match);
+    def keys as list of string init maps.keys($matchAttrs);
     for (def k in $keys) {
-        $attrs[$k] = $match[$k];
+        $attrs[$k] = $matchAttrs[$k];
     }
     add($c, FIREWALL_PATH, $attrs);
 }

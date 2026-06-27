@@ -219,16 +219,12 @@ func durationToDays(value as string) {
             }
             def n as int init convert.toInt($digits);
             $digits = "";
-            if ($ch == "w") {
-                $total = $total + $n * 604800;
-            } elseif ($ch == "d") {
-                $total = $total + $n * 86400;
-            } elseif ($ch == "h") {
-                $total = $total + $n * 3600;
-            } elseif ($ch == "m") {
-                $total = $total + $n * 60;
-            } else {
-                $total = $total + $n;
+            match ($ch) {
+                when "w" { $total = $total + $n * 604800; }
+                when "d" { $total = $total + $n * 86400; }
+                when "h" { $total = $total + $n * 3600; }
+                when "m" { $total = $total + $n * 60; }
+                else { $total = $total + $n; }
             }
         } else {
             return -1;

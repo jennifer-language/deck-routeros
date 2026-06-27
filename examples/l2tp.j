@@ -26,14 +26,14 @@ if ($host == "" or $user == "") {
 
 def c as mt.Client init mt.connect($host, $user, $password);
 
-def s as mt.LtwotpServer init mt.ltwotpServerStatus($c);
+def s as mt.L2tpServer init mt.l2tpServerStatus($c);
 io.printf("l2tp server enabled=%t ipsec=%t\n", $s.enabled, $s.useIpsec);
-def clients as list of mt.LtwotpClient init mt.ltwotpClients($c);
+def clients as list of mt.L2tpClient init mt.l2tpClients($c);
 for (def cl in $clients) { io.printf("l2tp client %s -> %s running=%t\n", $cl.name, $cl.connectTo, $cl.running); }
 def sessions as list of mt.PppSession init mt.pppActive($c);
 for (def sess in $sessions) { io.printf("connected: %s (%s) from %s\n", $sess.name, $sess.service, $sess.callerId); }
 
-#   mt.enableLtwotpServer($c, "a long random ipsec secret");
+#   mt.enableL2tpServer($c, "a long random ipsec secret");
 #   mt.addVpnUser($c, "alice", "her password", "l2tp", "field laptop");
 
 mt.disconnect($c);

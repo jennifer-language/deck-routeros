@@ -36,7 +36,7 @@ for (def p in $pols) { io.printf("policy %s -> %s active=%t\n", $p.srcAddress, $
 #       "a long random shared secret", "192.168.10.0/24", "192.168.20.0/24");
 
 # IKEv2 road-warrior server (native iOS/macOS/Windows clients, not run here):
-#   mt.setupIkevTwoServer($c, "roadwarriors", "router-le-cert",
+#   mt.setupIkev2Server($c, "roadwarriors", "router-le-cert",
 #       "10.200.0.10-10.200.0.200", "1.1.1.1");
 
 mt.disconnect($c);

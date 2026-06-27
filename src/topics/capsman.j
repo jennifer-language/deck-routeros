@@ -61,18 +61,18 @@ export def struct ManagedAp {
  * @return {CapsmanStatus} the controller state (version 0 when neither exists)
  */
 export func capsmanStatus(c as Client) {
-    def vtwo as map of string to string init tryFirstRow($c, WIFI_CAPSMAN_PATH);
-    if (len($vtwo) > 0) {
+    def v2 as map of string to string init tryFirstRow($c, WIFI_CAPSMAN_PATH);
+    if (len($v2) > 0) {
         return CapsmanStatus{
-            enabled: rowBool($vtwo, "enabled"),
+            enabled: rowBool($v2, "enabled"),
             version: 2,
             managedAps: countRows($c, WIFI_CAP_PATH)
         };
     }
-    def vone as map of string to string init tryFirstRow($c, CAPSMAN_PATH);
-    if (len($vone) > 0) {
+    def v1 as map of string to string init tryFirstRow($c, CAPSMAN_PATH);
+    if (len($v1) > 0) {
         return CapsmanStatus{
-            enabled: rowBool($vone, "enabled"),
+            enabled: rowBool($v1, "enabled"),
             version: 1,
             managedAps: countRows($c, CAPSMAN_REMOTE_PATH)
         };

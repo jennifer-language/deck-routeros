@@ -376,11 +376,11 @@ func ipsecPolicyFromRow(row as map of string to string) {
  * @return {string} the RouterOS id of the peer
  * @throws {Error} kind "routeros" on bad input or a taken name
  * @example
- *   mt.setupIkevTwoServer($c, "roadwarriors", "router-le-cert",
+ *   mt.setupIkev2Server($c, "roadwarriors", "router-le-cert",
  *       "10.200.0.10-10.200.0.200", "1.1.1.1");
  *   # add EAP users via RADIUS, or /ip/ipsec identity with the generic verbs
  */
-export func setupIkevTwoServer(c as Client, name as string, certificate as string, poolRange as string, dns as string) {
+export func setupIkev2Server(c as Client, name as string, certificate as string, poolRange as string, dns as string) {
     ensureName($name, "IKEv2 server");
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
     ensureIpAddress($dns);

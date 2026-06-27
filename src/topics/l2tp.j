@@ -5,10 +5,10 @@
 # Spliced into routeros.j via include - not a standalone module.
 
 /** RouterOS API path of the L2TP server settings (single row). */
-export def const LTWOTP_SERVER_PATH as string init "/interface/l2tp-server/server";
+export def const L2TP_SERVER_PATH as string init "/interface/l2tp-server/server";
 
 /** RouterOS API path of the L2TP client list (dial OUT to a server). */
-export def const LTWOTP_CLIENT_PATH as string init "/interface/l2tp-client";
+export def const L2TP_CLIENT_PATH as string init "/interface/l2tp-client";
 
 /**
  * The L2TP server settings.
@@ -17,7 +17,7 @@ export def const LTWOTP_CLIENT_PATH as string init "/interface/l2tp-client";
  * @field {bool}   useIpsec       true when L2TP/IPsec (encrypted) is required
  * @field {string} defaultProfile the PPP profile applied to logins
  */
-export def struct LtwotpServer {
+export def struct L2tpServer {
     enabled as bool,
     useIpsec as bool,
     defaultProfile as string
@@ -34,7 +34,7 @@ export def struct LtwotpServer {
  * @field {bool}   disabled      true when switched off
  * @field {string} comment       free-text comment, "" when unset
  */
-export def struct LtwotpClient {
+export def struct L2tpClient {
     id as string,
     name as string,
     connectTo as string,
@@ -48,10 +48,10 @@ export def struct LtwotpClient {
  * Read the L2TP server settings.
  *
  * @param {Client} c an open client
- * @return {LtwotpServer} the server state
+ * @return {L2tpServer} the server state
  */
-export func ltwotpServerStatus(c as Client) {
-    return ltwotpServerFromRow(singleRow($c, LTWOTP_SERVER_PATH));
+export func l2tpServerStatus(c as Client) {
+    return l2tpServerFromRow(singleRow($c, L2TP_SERVER_PATH));
 }
 
 /**
@@ -68,16 +68,16 @@ export func ltwotpServerStatus(c as Client) {
  * @param {string} ipsecSecret the shared secret every client also enters
  * @throws {Error} kind "routeros" on an empty secret
  * @example
- *   mt.enableLtwotpServer($c, "a long random ipsec secret");
+ *   mt.enableL2tpServer($c, "a long random ipsec secret");
  *   mt.addVpnUser($c, "alice", "her password", "l2tp", "field laptop");
  *   # clients set: server = the router's public address/name, PSK = the
  *   # secret, username/password = the login
  */
-export func enableLtwotpServer(c as Client, ipsecSecret as string) {
+export func enableL2tpServer(c as Client, ipsecSecret as string) {
     if (strings.trim($ipsecSecret) == "") {
         raiseError("the IPsec secret must not be empty - L2TP without it is cleartext");
     }
-    mikrotik.run($c.session, LTWOTP_SERVER_PATH + "/set",
+    mikrotik.run($c.session, L2TP_SERVER_PATH + "/set",
         {"enabled": "yes", "use-ipsec": "required", "ipsec-secret": $ipsecSecret});
     ensureInputAccept($c, "l2tp: server (l2tp)", {"protocol": "udp", "dst-port": "1701"});
     ensureInputAccept($c, "l2tp: server (ike)", {"protocol": "udp", "dst-port": "500"});
@@ -90,8 +90,8 @@ export func enableLtwotpServer(c as Client, ipsecSecret as string) {
  *
  * @param {Client} c an open client
  */
-export func disableLtwotpServer(c as Client) {
-    mikrotik.run($c.session, LTWOTP_SERVER_PATH + "/set", {"enabled": "no"});
+export func disableL2tpServer(c as Client) {
+    mikrotik.run($c.session, L2TP_SERVER_PATH + "/set", {"enabled": "no"});
     removeInputAcceptsByPrefix($c, "l2tp: server (");
 }
 
@@ -99,13 +99,13 @@ export func disableLtwotpServer(c as Client) {
  * List the L2TP clients (dial-out tunnels).
  *
  * @param {Client} c an open client
- * @return {list of LtwotpClient} all L2TP clients
+ * @return {list of L2tpClient} all L2TP clients
  */
-export func ltwotpClients(c as Client) {
-    def rows as list of map of string to string init getAll($c, LTWOTP_CLIENT_PATH);
-    def out as list of LtwotpClient init [];
+export func l2tpClients(c as Client) {
+    def rows as list of map of string to string init getAll($c, L2TP_CLIENT_PATH);
+    def out as list of L2tpClient init [];
     for (def row in $rows) {
-        $out[] = ltwotpClientFromRow($row);
+        $out[] = l2tpClientFromRow($row);
     }
     return $out;
 }
@@ -121,9 +121,9 @@ export func ltwotpClients(c as Client) {
  * @return {string} the RouterOS id of the (new or existing) client
  * @throws {Error} kind "routeros" on bad input
  */
-export func addLtwotpClient(c as Client, name as string, serverAddress as string, user as string, password as string) {
+export func addL2tpClient(c as Client, name as string, serverAddress as string, user as string, password as string) {
     def none as map of string to string init {};
-    return vpnClientAdd($c, LTWOTP_CLIENT_PATH, "L2TP", $name, $serverAddress, $user, $password, $none);
+    return vpnClientAdd($c, L2TP_CLIENT_PATH, "L2TP", $name, $serverAddress, $user, $password, $none);
 }
 
 /**
@@ -133,19 +133,19 @@ export func addLtwotpClient(c as Client, name as string, serverAddress as string
  * @param {string} name the client interface name
  * @throws {Error} kind "routeros" when no such client exists
  */
-export func removeLtwotpClient(c as Client, name as string) {
-    remove($c, LTWOTP_CLIENT_PATH, requiredId($c, LTWOTP_CLIENT_PATH, $name, "L2TP client"));
+export func removeL2tpClient(c as Client, name as string) {
+    remove($c, L2TP_CLIENT_PATH, requiredId($c, L2TP_CLIENT_PATH, $name, "L2TP client"));
 }
 
 /**
- * Fold a reply row into an LtwotpServer.
+ * Fold a reply row into an L2tpServer.
  *
  * @param {map of string to string} row the "/interface/l2tp-server/server" row
- * @return {LtwotpServer} the typed server state
+ * @return {L2tpServer} the typed server state
  * @internal
  */
-func ltwotpServerFromRow(row as map of string to string) {
-    return LtwotpServer{
+func l2tpServerFromRow(row as map of string to string) {
+    return L2tpServer{
         enabled: rowBool($row, "enabled"),
         useIpsec: rowValue($row, "use-ipsec") != "no" and rowValue($row, "use-ipsec") != "",
         defaultProfile: rowValue($row, "default-profile")
@@ -153,14 +153,14 @@ func ltwotpServerFromRow(row as map of string to string) {
 }
 
 /**
- * Fold a reply row into an LtwotpClient.
+ * Fold a reply row into an L2tpClient.
  *
  * @param {map of string to string} row an "/interface/l2tp-client/print" row
- * @return {LtwotpClient} the typed client
+ * @return {L2tpClient} the typed client
  * @internal
  */
-func ltwotpClientFromRow(row as map of string to string) {
-    return LtwotpClient{
+func l2tpClientFromRow(row as map of string to string) {
+    return L2tpClient{
         id: rowValue($row, ".id"),
         name: rowValue($row, "name"),
         connectTo: rowValue($row, "connect-to"),
