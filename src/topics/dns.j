@@ -88,7 +88,7 @@ export func dnsSettings(c as Client) {
  * @throws {Error} kind "routeros" when an entry is not an IP address
  */
 export func setDnsServers(c as Client, servers as string) {
-    mikrotik.run($c.session, DNS_PATH + "/set", {"servers": normalizedAddressList($servers)});
+    apiRun($c, DNS_PATH + "/set", {"servers": normalizedAddressList($servers)});
 }
 
 /**
@@ -103,7 +103,7 @@ export func setDnsServers(c as Client, servers as string) {
  * @param {bool}   allow true to answer client queries, false to refuse them
  */
 export func allowRemoteDnsRequests(c as Client, allow as bool) {
-    mikrotik.run($c.session, DNS_PATH + "/set", {"allow-remote-requests": boolWord($allow)});
+    apiRun($c, DNS_PATH + "/set", {"allow-remote-requests": boolWord($allow)});
 }
 
 /**
@@ -221,7 +221,7 @@ export func resolvedAddresses(c as Client, name as string) {
  */
 export func flushDnsCache(c as Client) {
     def none as map of string to string init {};
-    mikrotik.run($c.session, DNS_CACHE_PATH + "/flush", $none);
+    apiRun($c, DNS_CACHE_PATH + "/flush", $none);
 }
 
 /**

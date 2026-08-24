@@ -66,7 +66,7 @@ export func clock(c as Client) {
 export func setTimezone(c as Client, timezone as string) {
     def tz as string init strings.trim($timezone);
     ensureName($tz, "timezone");
-    mikrotik.run($c.session, CLOCK_PATH + "/set",
+    apiRun($c, CLOCK_PATH + "/set",
         {"time-zone-name": $tz, "time-zone-autodetect": "no"});
 }
 
@@ -86,7 +86,7 @@ export func setTimezone(c as Client, timezone as string) {
  */
 export func useNtp(c as Client, servers as string) {
     def serverList as string init normalizedNtpServers($servers);
-    mikrotik.run($c.session, NTP_CLIENT_PATH + "/set",
+    apiRun($c, NTP_CLIENT_PATH + "/set",
         {"enabled": "yes", "servers": $serverList});
 }
 
@@ -96,7 +96,7 @@ export func useNtp(c as Client, servers as string) {
  * @param {Client} c an open client
  */
 export func disableNtp(c as Client) {
-    mikrotik.run($c.session, NTP_CLIENT_PATH + "/set", {"enabled": "no"});
+    apiRun($c, NTP_CLIENT_PATH + "/set", {"enabled": "no"});
 }
 
 /**

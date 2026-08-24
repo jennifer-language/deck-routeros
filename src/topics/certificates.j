@@ -110,7 +110,7 @@ export func generateSelfSigned(c as Client, name as string, commonName as string
         "days-valid": convert.toString($days),
         "key-usage": "digital-signature,key-encipherment,tls-server"
     });
-    mikrotik.talk($c.session, CERTIFICATE_PATH + "/sign", {".id": $id});
+    apiTalk($c, CERTIFICATE_PATH + "/sign", {".id": $id});
     return $id;
 }
 
@@ -131,7 +131,7 @@ export func generateSelfSigned(c as Client, name as string, commonName as string
 export func enableLetsEncrypt(c as Client, dnsName as string) {
     def target as string init strings.trim($dnsName);
     ensureHost($target);
-    mikrotik.talk($c.session, "/certificate/enable-ssl-certificate", {"dns-name": $target});
+    apiTalk($c, "/certificate/enable-ssl-certificate", {"dns-name": $target});
 }
 
 /**
@@ -154,9 +154,9 @@ export func importCertificatePem(c as Client, name as string, certPem as string,
     ensurePemKey($keyPem);
     writeFileText($c, $name + ".crt", $certPem);
     writeFileText($c, $name + ".key", $keyPem);
-    mikrotik.talk($c.session, CERTIFICATE_PATH + "/import",
+    apiTalk($c, CERTIFICATE_PATH + "/import",
         {"file-name": $name + ".crt", "passphrase": "", "name": $name});
-    mikrotik.talk($c.session, CERTIFICATE_PATH + "/import",
+    apiTalk($c, CERTIFICATE_PATH + "/import",
         {"file-name": $name + ".key", "passphrase": "", "name": $name});
     removeFile($c, $name + ".crt");
     removeFile($c, $name + ".key");

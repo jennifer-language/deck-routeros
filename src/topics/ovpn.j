@@ -79,7 +79,7 @@ export func ovpnServerStatus(c as Client) {
 export func enableOvpnServer(c as Client, certificate as string, port as int) {
     ensurePort($port);
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
-    mikrotik.run($c.session, OVPN_SERVER_PATH + "/set", {
+    apiRun($c, OVPN_SERVER_PATH + "/set", {
         "enabled": "yes",
         "certificate": $certificate,
         "port": convert.toString($port),
@@ -94,7 +94,7 @@ export func enableOvpnServer(c as Client, certificate as string, port as int) {
  * @param {Client} c an open client
  */
 export func disableOvpnServer(c as Client) {
-    mikrotik.run($c.session, OVPN_SERVER_PATH + "/set", {"enabled": "no"});
+    apiRun($c, OVPN_SERVER_PATH + "/set", {"enabled": "no"});
     removeInputAcceptsByPrefix($c, "ovpn: server");
 }
 

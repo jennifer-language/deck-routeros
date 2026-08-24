@@ -78,7 +78,7 @@ export func sstpServerStatus(c as Client) {
 export func enableSstpServer(c as Client, certificate as string, port as int) {
     ensurePort($port);
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
-    mikrotik.run($c.session, SSTP_SERVER_PATH + "/set",
+    apiRun($c, SSTP_SERVER_PATH + "/set",
         {"enabled": "yes", "certificate": $certificate, "port": convert.toString($port)});
     ensureInputAccept($c, "sstp: server", {"protocol": "tcp", "dst-port": convert.toString($port)});
 }
@@ -89,7 +89,7 @@ export func enableSstpServer(c as Client, certificate as string, port as int) {
  * @param {Client} c an open client
  */
 export func disableSstpServer(c as Client) {
-    mikrotik.run($c.session, SSTP_SERVER_PATH + "/set", {"enabled": "no"});
+    apiRun($c, SSTP_SERVER_PATH + "/set", {"enabled": "no"});
     removeInputAcceptsByPrefix($c, "sstp: server");
 }
 

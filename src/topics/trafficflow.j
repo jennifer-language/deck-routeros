@@ -79,7 +79,7 @@ export func flowTargets(c as Client) {
  *   mt.addFlowTarget($c, "10.0.9.30", 2055, "ipfix");
  */
 export func enableTrafficFlow(c as Client) {
-    mikrotik.run($c.session, TRAFFIC_FLOW_PATH + "/set", {"enabled": "yes", "interfaces": "all"});
+    apiRun($c, TRAFFIC_FLOW_PATH + "/set", {"enabled": "yes", "interfaces": "all"});
 }
 
 /**
@@ -88,7 +88,7 @@ export func enableTrafficFlow(c as Client) {
  * @param {Client} c an open client
  */
 export func disableTrafficFlow(c as Client) {
-    mikrotik.run($c.session, TRAFFIC_FLOW_PATH + "/set", {"enabled": "no"});
+    apiRun($c, TRAFFIC_FLOW_PATH + "/set", {"enabled": "no"});
 }
 
 /**

@@ -351,7 +351,7 @@ export func wanStatus(c as Client, interfaceName as string) {
  * @throws {Error} kind "routeros" when no DHCP client runs on that interface
  */
 export func renewWan(c as Client, interfaceName as string) {
-    mikrotik.run($c.session, DHCP_CLIENT_PATH + "/renew",
+    apiRun($c, DHCP_CLIENT_PATH + "/renew",
         {".id": requiredDhcpClientId($c, $interfaceName)});
 }
 

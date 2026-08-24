@@ -17,6 +17,9 @@ import "./src/routeros.j" as mt;
 
 def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
 
+# see what gets sent (credentials are redacted); MT_VERBOSE=1 does the same
+$c = mt.setVerbose($c, true);
+
 # bridges
 mt.addBridge($c, "brlan");
 mt.addBridgePort($c, "brlan", "ether2");

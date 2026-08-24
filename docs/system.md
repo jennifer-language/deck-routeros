@@ -47,6 +47,8 @@ versions known and different).
 | `upgradeRouterboard(c)` | stage the firmware flash (applies at next reboot) |
 | `reboot(c)` | reboot now; connection drops |
 | `shutdown(c)` | power off; someone must push the button |
+| `deviceMode(c)` → `DeviceMode` | the active mode and the features it gates |
+| `updateDeviceMode(c, mode)` | **request** a mode change (needs physical confirmation) |
 
 ## Examples
 
@@ -79,6 +81,32 @@ Rename a batch of routers:
 ```jennifer
 mt.setIdentity($c, "office-gw");
 ```
+
+## Device mode
+
+RouterOS gates the features that can execute code — the scheduler,
+`/tool/fetch`, e-mail, containers — behind a *device mode*. On a router
+in `home` mode those menus report as missing rather than refused, which
+is worth checking first when a feature "does not exist":
+
+```jennifer
+def d as mt.DeviceMode init mt.deviceMode($c);
+io.printf("mode=%s scheduler=%t container=%t\n", $d.mode, $d.scheduler, $d.container);
+```
+
+Raising the mode is deliberately not something a remote script can
+finish on its own:
+
+```jennifer
+mt.updateDeviceMode($c, mt.DEVICE_MODE_ADVANCED);
+```
+
+That call only makes the change **pending**. The router applies it when
+someone power-cycles it — a cold boot, *not* `reboot(c)` — or presses
+the reset button, within a few minutes. Miss the window and the request
+is discarded silently, leaving the mode as it was. Modes are
+`DEVICE_MODE_HOME`, `DEVICE_MODE_ADVANCED`, and
+`DEVICE_MODE_ENTERPRISE`.
 
 ## Connection-dropping semantics
 

@@ -56,6 +56,38 @@ mt.enableFirewallRuleByComment($c, "no smb forwarding");   # resume
 mt.removeFirewallRuleByComment($c, "no smb forwarding");   # delete
 ```
 
+## Ordering
+
+The chains are walked top to bottom and stop at the first match, so
+position *is* the policy. `addFirewallRule` appends, which means a rule
+added after a broad drop sits below it and never fires. Lift it back:
+
+```jennifer
+def wg as string init mt.allowService($c, "udp", 13231, "wireguard in");
+mt.moveFirewallRule($c, $wg, $dropNonLanId);       # by id
+```
+
+Addressed by the comment handles instead, which survive a rule being
+re-added:
+
+```jennifer
+mt.moveFirewallRuleByComment($c, "wireguard in", "drop everything else");
+```
+
+Pass `""` as the destination to send a rule to the bottom, and reach for
+the generic verbs from [core.md](core.md) for the ends of any ordered
+list:
+
+```jennifer
+mt.moveFirewallRuleByComment($c, "log leftovers", "");   # to the bottom
+mt.moveRuleToTop($c, mt.FIREWALL_PATH, $establishedId);  # the cheap match first
+```
+
+The same pair exists for the other ordered tables - `moveNatRule` /
+`moveNatRuleByComment` ([nat.md](nat.md)), `moveMangleRule` /
+`moveMangleRuleByComment` ([mangle.md](mangle.md)), and `moveRawRule` /
+`moveRawRuleByComment` ([raw.md](raw.md)).
+
 ## Shortcuts
 
 ```jennifer
@@ -82,8 +114,9 @@ for (def fr in $rules) {
 
 - **Order matters and routeros appends.** A new rule lands at the end
   of its chain. If an earlier rule already dropped the traffic, your
-  new accept never fires. Reorder via the generic `set`/`talk` or the
-  RouterOS UI if you need precise placement.
+  new accept never fires - fix it with `moveFirewallRule` /
+  `moveFirewallRuleByComment` (see [Ordering](#ordering)), not by
+  deleting and re-adding.
 - **Do not lock yourself out.** Adding a drop rule on `input` that
   matches your own management connection disconnects you. Add your
   accept rules (e.g. `allowService`) *before* broad drops.

@@ -149,3 +149,44 @@ func testFetchResultFromRowFailed() {
     testing.assertFalse($r.ok);
     testing.assertEqual($r.data, "");
 }
+
+func testEmailTlsWordModernPassesThrough() {
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_STARTTLS, "tls"), "starttls");
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_IMPLICIT, "tls"), "yes");
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_NONE, "tls"), "no");
+}
+
+# pre-7.12 routers spell the same three states differently
+func testEmailTlsWordLegacyRemaps() {
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_STARTTLS, "start-tls"), "yes");
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_IMPLICIT, "start-tls"), "tls-only");
+    testing.assertEqual(emailTlsWord(EMAIL_TLS_NONE, "start-tls"), "no");
+}
+
+func testModernTlsWordFoldsLegacyReadings() {
+    testing.assertEqual(modernTlsWord("yes"), EMAIL_TLS_STARTTLS);
+    testing.assertEqual(modernTlsWord("tls-only"), EMAIL_TLS_IMPLICIT);
+    testing.assertEqual(modernTlsWord("no"), EMAIL_TLS_NONE);
+    testing.assertEqual(modernTlsWord(""), EMAIL_TLS_NONE);
+}
+
+func testEmailTlsRoundTripsThroughLegacySpelling() {
+    testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_STARTTLS, "start-tls")), EMAIL_TLS_STARTTLS);
+    testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_IMPLICIT, "start-tls")), EMAIL_TLS_IMPLICIT);
+    testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_NONE, "start-tls")), EMAIL_TLS_NONE);
+}
+
+func testEnsureEmailTlsAcceptsConstants() {
+    ensureEmailTls(EMAIL_TLS_NONE);
+    ensureEmailTls(EMAIL_TLS_STARTTLS);
+    ensureEmailTls(EMAIL_TLS_IMPLICIT);
+    testing.assertTrue(true);
+}
+
+func failEmailTlsUnknown() {
+    ensureEmailTls("ssl");
+}
+
+func testEnsureEmailTlsRejectsUnknown() {
+    testing.assertThrows("failEmailTlsUnknown", "routeros");
+}

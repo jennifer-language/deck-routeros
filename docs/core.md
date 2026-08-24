@@ -52,6 +52,11 @@ helper for (`/ip/dhcp-server/option`, `/ppp/secret`, `/certificate`, ...):
 | `findByName(c, path, name)` | first item whose `name` matches (empty map on miss) |
 | `idByName(c, path, name)` | its id, `""` on miss |
 | `enable(c, path, id)` / `disable(c, path, id)` | flip the `disabled` flag |
+| `moveRule(c, path, id, beforeId)` | reorder an ordered list; `""` sends it to the bottom |
+| `moveRuleToTop(c, path, id)` | move to the top (no-op when already first) |
+| `moveRuleToBottom(c, path, id)` | move to the bottom |
+| `setVerbose(c, enabled)` → `Client` | turn command logging on/off (returns a **copy**) |
+| `isVerbose(c)` → bool | whether this client logs |
 
 Paths are normalized for you: `"interface"`, `"/interface"`, and
 `"/interface/"` all mean the same thing.
@@ -75,6 +80,67 @@ they now have a typed helper of their own, see
 Attribute maps use RouterOS's own property names (with dashes, e.g.
 `"mac-address"`); values are always strings, booleans written as
 `"yes"` / `"no"`.
+
+## Verbose mode (seeing what is sent)
+
+Turn logging on and every command the client sends is printed to stdout
+just before it goes out, so a provisioning run reads back as a
+transcript of what it did:
+
+```jennifer
+def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
+$c = mt.setVerbose($c, true);
+
+mt.addBridge($c, "brlan");
+mt.addIpAddress($c, "192.168.88.1/24", "brlan");
+```
+
+```
+mt> /interface/bridge/add name=brlan
+mt> /ip/address/add address=192.168.88.1/24 interface=brlan
+```
+
+Reads log the path and how many rows came back:
+
+```
+mt> /ip/address/print
+mt< 3 rows
+```
+
+**`setVerbose` returns a copy — keep it.** A Jennifer module holds no
+mutable state (`mutable def is not allowed at a module's top level`), so
+there is no global switch to flip; the flag rides on the `Client` like
+every other value in the deck. `mt.setVerbose($c, true);` on its own
+does nothing — you must write `$c = mt.setVerbose($c, true);`.
+
+Set the environment variable `MT_VERBOSE` to `1` / `yes` / `true` / `on`
+and `connect` seeds the flag for you, which traces an existing script
+without editing it:
+
+```sh
+MT_VERBOSE=1 jennifer run provision.j
+```
+
+**Credentials are never printed.** Verbose mode shows what goes on the
+wire, and that includes SMTP passwords, WPA keys, IPsec and PPP secrets,
+and WireGuard private keys — so those values are replaced:
+
+```
+mt> /tool/e-mail/set server=smtp.example.org user=router password=<redacted>
+```
+
+The redaction is deliberately narrow, matching `password`, `secret`,
+`passphrase`, `*-password`, `*-secret`, `*-passphrase`, `private-key`,
+and anything containing `pre-shared-key`. `public-key` is public,
+`key-usage` is a certificate flag, and `passive` / `passthrough` merely
+start with the same letters — none of those are hidden. One thing it
+cannot redact: an SNMP community is sent as an ordinary `name`, so it
+will appear in the log ([snmp.md](snmp.md) notes that a community
+string acts like a password).
+
+Logging covers **every** command the module sends, not just the generic
+verbs — the topic files never call the transport directly, they all
+funnel through the same internal chokepoint.
 
 ## Errors
 

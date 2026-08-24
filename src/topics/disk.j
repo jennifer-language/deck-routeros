@@ -101,7 +101,7 @@ export func formatDisk(c as Client, name as string, filesystem as string, label 
     if (strings.trim($label) != "") {
         $attrs["label"] = $label;
     }
-    mikrotik.run($c.session, DISK_PATH + "/format-drive", $attrs);
+    apiRun($c, DISK_PATH + "/format-drive", $attrs);
 }
 
 /**
@@ -113,7 +113,7 @@ export func formatDisk(c as Client, name as string, filesystem as string, label 
  */
 export func ejectDisk(c as Client, name as string) {
     def id as string init requiredId($c, DISK_PATH, $name, "disk");
-    mikrotik.run($c.session, DISK_PATH + "/eject", {".id": $id});
+    apiRun($c, DISK_PATH + "/eject", {".id": $id});
 }
 
 /**

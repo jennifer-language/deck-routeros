@@ -124,7 +124,7 @@ export func updateScript(c as Client, name as string, source as string) {
  *                 kind "mikrotik" when the script itself errors
  */
 export func runScript(c as Client, name as string) {
-    return mikrotik.run($c.session, SCRIPT_PATH + "/run",
+    return apiRun($c, SCRIPT_PATH + "/run",
         {".id": requiredId($c, SCRIPT_PATH, $name, "script")});
 }
 

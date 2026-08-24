@@ -54,7 +54,7 @@ export func files(c as Client) {
  */
 export func saveBackup(c as Client, name as string) {
     ensureName($name, "backup");
-    mikrotik.run($c.session, "/system/backup/save", {"name": $name});
+    apiRun($c, "/system/backup/save", {"name": $name});
     ensureBackupExists($c, $name);
 }
 
@@ -72,7 +72,7 @@ export func saveBackupWith(c as Client, name as string, password as string) {
     if (strings.trim($password) == "") {
         raiseError("the backup password must not be empty - use saveBackup for an unencrypted backup");
     }
-    mikrotik.run($c.session, "/system/backup/save", {"name": $name, "password": $password});
+    apiRun($c, "/system/backup/save", {"name": $name, "password": $password});
     ensureBackupExists($c, $name);
 }
 

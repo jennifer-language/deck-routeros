@@ -20,8 +20,12 @@ def const DIGIT_CHARS as string init "0123456789";
  * @field {string} user the account this session is logged in as - used
  *        by the user-management helpers to refuse self-destructive
  *        operations (removing or disabling your own account)
+ * @field {bool} verbose when true, every command this client sends is
+ *        printed to stdout before it goes out - see `setVerbose`. A
+ *        module holds no mutable state in Jennifer, so the flag rides
+ *        on the client rather than sitting in a global.
  */
-export def struct Client { session as mikrotik.Session, user as string };
+export def struct Client { session as mikrotik.Session, user as string, verbose as bool };
 
 /**
  * Connect to a router over the plaintext API port (8728).
@@ -33,7 +37,7 @@ export def struct Client { session as mikrotik.Session, user as string };
  * @throws {Error} kind "mikrotik" when the connection or login fails
  */
 export func connect(host as string, user as string, password as string) {
-    return Client{ session: mikrotik.connect(mikrotik.options($host, $user, $password)), user: $user };
+    return Client{ session: mikrotik.connect(mikrotik.options($host, $user, $password)), user: $user, verbose: verboseFromEnv() };
 }
 
 /**
@@ -46,7 +50,7 @@ export func connect(host as string, user as string, password as string) {
  * @throws {Error} kind "mikrotik" when the connection or login fails
  */
 export func connectTLS(host as string, user as string, password as string) {
-    return Client{ session: mikrotik.connect(mikrotik.optionsTLS($host, $user, $password)), user: $user };
+    return Client{ session: mikrotik.connect(mikrotik.optionsTLS($host, $user, $password)), user: $user, verbose: verboseFromEnv() };
 }
 
 /**
@@ -67,7 +71,7 @@ export func connectWith(host as string, port as int, user as string, password as
     if ($tls) {
         $o = mikrotik.optionsTLS($host, $user, $password);
     }
-    return Client{ session: mikrotik.connect(mikrotik.withPort($o, $port)), user: $user };
+    return Client{ session: mikrotik.connect(mikrotik.withPort($o, $port)), user: $user, verbose: verboseFromEnv() };
 }
 
 /**
@@ -93,7 +97,7 @@ export func disconnect(c as Client) {
  * @throws {Error} kind "routeros" on an empty path, kind "mikrotik" on a router error
  */
 export func getAll(c as Client, path as string) {
-    return mikrotik.print($c.session, apiPath($path));
+    return apiPrint($c, apiPath($path));
 }
 
 /**
@@ -106,7 +110,7 @@ export func getAll(c as Client, path as string) {
  * @throws {Error} kind "routeros" on an empty path, kind "mikrotik" when the router refuses
  */
 export func add(c as Client, path as string, attrs as map of string to string) {
-    return mikrotik.run($c.session, apiPath($path) + "/add", $attrs);
+    return apiRun($c, apiPath($path) + "/add", $attrs);
 }
 
 /**
@@ -121,7 +125,7 @@ export func add(c as Client, path as string, attrs as map of string to string) {
  */
 export func remove(c as Client, path as string, id as string) {
     ensureId($id);
-    mikrotik.run($c.session, apiPath($path) + "/remove", {".id": $id});
+    apiRun($c, apiPath($path) + "/remove", {".id": $id});
 }
 
 /**
@@ -137,7 +141,7 @@ export func set(c as Client, path as string, id as string, attrs as map of strin
     ensureId($id);
     def merged as map of string to string init $attrs;
     $merged[".id"] = $id;
-    mikrotik.run($c.session, apiPath($path) + "/set", $merged);
+    apiRun($c, apiPath($path) + "/set", $merged);
 }
 
 /**
@@ -165,7 +169,7 @@ export func update(c as Client, path as string, id as string, attrs as map of st
  * @return {map of string to string} the item's properties, or an empty map when absent
  */
 export func findByName(c as Client, path as string, name as string) {
-    def rows as list of map of string to string init mikrotik.printWhere($c.session, apiPath($path), ["?name=" + $name]);
+    def rows as list of map of string to string init apiPrintWhere($c, apiPath($path), ["?name=" + $name]);
     if (len($rows) == 0) {
         def empty as map of string to string init {};
         return $empty;
@@ -220,6 +224,80 @@ export func enable(c as Client, path as string, id as string) {
  */
 export func disable(c as Client, path as string, id as string) {
     set($c, $path, $id, {"disabled": "yes"});
+}
+
+/**
+ * Move an item of an ordered list so it sits directly above another item.
+ *
+ * RouterOS walks its ordered lists - the firewall tables, mangle, raw,
+ * simple queues - strictly top to bottom and stops at the first match,
+ * so position is semantics, not cosmetics: an accept rule above a drop
+ * rule wins, and the same two rules in the other order do the opposite.
+ * This is the verb that repairs an order after the fact, instead of
+ * removing and re-adding the rule at the end.
+ *
+ * `beforeId` names the item the moved item should end up *above*; pass
+ * "" to send it to the bottom of the list.
+ *
+ * @param {Client} c        an open client
+ * @param {string} path     the ordered list path (e.g. "/ip/firewall/filter")
+ * @param {string} id       the item to move
+ * @param {string} beforeId the item to land in front of, "" for the bottom
+ * @throws {Error} kind "routeros" on an empty id or a self-move,
+ *                 kind "mikrotik" when the router rejects the move
+ * @example
+ *   mt.moveRule($c, mt.FIREWALL_PATH, $acceptWgId, $dropNonLanId);
+ */
+export func moveRule(c as Client, path as string, id as string, beforeId as string) {
+    def p as string init apiPath($path);
+    ensureId($id);
+    def item as string init strings.trim($id);
+    def attrs as map of string to string init {"numbers": $item};
+    def dest as string init strings.trim($beforeId);
+    if ($dest != "") {
+        if ($dest == $item) {
+            raiseError("a rule cannot be moved before itself");
+        }
+        $attrs["destination"] = $dest;
+    }
+    apiRun($c, $p + "/move", $attrs);
+}
+
+/**
+ * Move an item to the top of its ordered list.
+ *
+ * A no-op when the item is already first.
+ *
+ * @param {Client} c    an open client
+ * @param {string} path the ordered list path
+ * @param {string} id   the item to move
+ * @throws {Error} kind "routeros" on an empty id or an empty list
+ * @example
+ *   mt.moveRuleToTop($c, mt.RAW_PATH, $dropBogonsId);
+ */
+export func moveRuleToTop(c as Client, path as string, id as string) {
+    ensureId($id);
+    def rows as list of map of string to string init getAll($c, $path);
+    if (len($rows) == 0) {
+        raiseError("the list " + apiPath($path) + " has no items to reorder");
+    }
+    def firstId as string init rowValue($rows[0], ".id");
+    if ($firstId == strings.trim($id)) {
+        return;
+    }
+    moveRule($c, $path, $id, $firstId);
+}
+
+/**
+ * Move an item to the bottom of its ordered list.
+ *
+ * @param {Client} c    an open client
+ * @param {string} path the ordered list path
+ * @param {string} id   the item to move
+ * @throws {Error} kind "routeros" on an empty id
+ */
+export func moveRuleToBottom(c as Client, path as string, id as string) {
+    moveRule($c, $path, $id, "");
 }
 
 /**
@@ -612,4 +690,275 @@ func ensureHost(host as string) {
     if (strings.contains($host, " ")) {
         raiseError("the target host must not contain spaces");
     }
+}
+
+/**
+ * Resolve a comment to the id of the item carrying it, under any path.
+ *
+ * Comments are the deck's stable handle on the ordered tables (a rule's
+ * id changes when it is re-added, its comment does not), so the
+ * *ByComment verbs all funnel through here.
+ *
+ * @param {Client} c       an open client
+ * @param {string} path    the list path to search
+ * @param {string} comment the comment to look for
+ * @param {string} what    noun for the error message (e.g. "firewall rule")
+ * @return {string} the item id
+ * @throws {Error} kind "routeros" when nothing carries that comment
+ * @internal
+ */
+func requiredIdByComment(c as Client, path as string, comment as string, what as string) {
+    def rows as list of map of string to string init getAll($c, $path);
+    def row as map of string to string init findRowByField($rows, "comment", $comment);
+    if (len($row) == 0) {
+        raiseError("no " + $what + " with the comment \"" + $comment + "\" was found");
+    }
+    return rowValue($row, ".id");
+}
+
+/**
+ * Turn command logging on or off for a client.
+ *
+ * With it on, every command routeros sends is printed to stdout just
+ * before it goes out, so a provisioning script can be read as a
+ * transcript of what it did to the router - and dry-run reviewed by
+ * eye before anyone points it at production.
+ *
+ * A Jennifer module holds no mutable state, so this is not a global
+ * switch: it returns a NEW client and you keep the returned one.
+ *
+ *     $c = mt.setVerbose($c, true);      # not mt.setVerbose($c, true);
+ *
+ * The environment variable `MT_VERBOSE` (`1` / `yes` / `true` / `on`)
+ * seeds the flag at `connect` time, so a script can be traced without
+ * editing it.
+ *
+ * @param {Client} c       an open client
+ * @param {bool}   enabled true to print commands, false to stop
+ * @return {Client} a copy of the client with the flag set
+ * @example
+ *   def c as mt.Client init mt.connect($host, $user, $password);
+ *   $c = mt.setVerbose($c, true);
+ *   mt.addBridge($c, "brlan");     # prints: mt> /interface/bridge/add name=brlan
+ */
+export func setVerbose(c as Client, enabled as bool) {
+    return Client{ session: $c.session, user: $c.user, verbose: $enabled };
+}
+
+/**
+ * Whether this client is printing the commands it sends.
+ *
+ * @param {Client} c an open client
+ * @return {bool} true when command logging is on
+ */
+export func isVerbose(c as Client) {
+    return $c.verbose;
+}
+
+/**
+ * Send a command that returns the `!done` `=ret=` value (add / set /
+ * remove / any action), logging it first when the client is verbose.
+ *
+ * Every write in the module funnels through here, so turning logging on
+ * covers all of them - the topic files never reach for `mikrotik.run`
+ * themselves.
+ *
+ * @param {Client} c       an open client
+ * @param {string} command the full RouterOS command path
+ * @param {map of string to string} attrs the `=key=value` attributes
+ * @return {string} the `=ret=` value the router replied with
+ * @internal
+ */
+func apiRun(c as Client, command as string, attrs as map of string to string) {
+    logCommand($c, $command, $attrs);
+    return mikrotik.run($c.session, $command, $attrs);
+}
+
+/**
+ * Send a command that returns reply rows, logging it first when the
+ * client is verbose.
+ *
+ * @param {Client} c       an open client
+ * @param {string} command the full RouterOS command path
+ * @param {map of string to string} attrs the `=key=value` attributes
+ * @return {list of map of string to string} the `!re` rows
+ * @internal
+ */
+func apiTalk(c as Client, command as string, attrs as map of string to string) {
+    logCommand($c, $command, $attrs);
+    def rows as list of map of string to string init mikrotik.talk($c.session, $command, $attrs);
+    logRows($c, $rows);
+    return $rows;
+}
+
+/**
+ * Read a whole list path, logging it first when the client is verbose.
+ *
+ * @param {Client} c    an open client
+ * @param {string} path the normalized list path
+ * @return {list of map of string to string} the rows
+ * @internal
+ */
+func apiPrint(c as Client, path as string) {
+    def none as map of string to string init {};
+    logCommand($c, $path + "/print", $none);
+    def rows as list of map of string to string init mikrotik.print($c.session, $path);
+    logRows($c, $rows);
+    return $rows;
+}
+
+/**
+ * Read a list path filtered by RouterOS query words, logging it first
+ * when the client is verbose.
+ *
+ * @param {Client} c       an open client
+ * @param {string} path    the normalized list path
+ * @param {list of string} queries the raw `?...` query words
+ * @return {list of map of string to string} the matching rows
+ * @internal
+ */
+func apiPrintWhere(c as Client, path as string, queries as list of string) {
+    if ($c.verbose) {
+        io.printf("mt> %s/print%s\n", $path, formatQueries($queries));
+    }
+    def rows as list of map of string to string init mikrotik.printWhere($c.session, $path, $queries);
+    logRows($c, $rows);
+    return $rows;
+}
+
+/**
+ * Print one outgoing command, when the client is verbose.
+ *
+ * @param {Client} c       an open client
+ * @param {string} command the command path
+ * @param {map of string to string} attrs its attributes
+ * @internal
+ */
+func logCommand(c as Client, command as string, attrs as map of string to string) {
+    if ($c.verbose) {
+        io.printf("mt> %s%s\n", $command, formatAttrs($attrs));
+    }
+}
+
+/**
+ * Print how many rows a read returned, when the client is verbose.
+ *
+ * @param {Client} c    an open client
+ * @param {list of map of string to string} rows the reply rows
+ * @internal
+ */
+func logRows(c as Client, rows as list of map of string to string) {
+    if ($c.verbose) {
+        if (len($rows) == 1) {
+            io.printf("mt< 1 row\n");
+        } else {
+            io.printf("mt< %d rows\n", len($rows));
+        }
+    }
+}
+
+/**
+ * Render attributes as ` key=value` pairs, secrets replaced.
+ *
+ * Insertion order is preserved, so the log shows the attributes in the
+ * order they go on the wire.
+ *
+ * @param {map of string to string} attrs the attributes
+ * @return {string} the rendered suffix, "" when there are none
+ * @internal
+ */
+func formatAttrs(attrs as map of string to string) {
+    def out as string init "";
+    def names as list of string init maps.keys($attrs);
+    for (def key in $names) {
+        $out = $out + " " + $key + "=" + loggedValue($key, $attrs[$key]);
+    }
+    return $out;
+}
+
+/**
+ * Render RouterOS query words for the log.
+ *
+ * @param {list of string} queries the raw `?...` words
+ * @return {string} the rendered suffix, "" when there are none
+ * @internal
+ */
+func formatQueries(queries as list of string) {
+    def out as string init "";
+    for (def q in $queries) {
+        $out = $out + " " + $q;
+    }
+    return $out;
+}
+
+/**
+ * The value to print for an attribute: the value itself, or a
+ * placeholder when the key carries a secret.
+ *
+ * @param {string} key   the attribute name
+ * @param {string} value the attribute value
+ * @return {string} what the log should show
+ * @internal
+ */
+func loggedValue(key as string, value as string) {
+    if (isSecretKey($key)) {
+        return "<redacted>";
+    }
+    return $value;
+}
+
+/**
+ * Whether an attribute name carries a credential.
+ *
+ * Verbose mode prints what goes on the wire, and what goes on the wire
+ * includes SMTP passwords, WPA keys, IPsec and PPP secrets, and
+ * WireGuard private keys - so those values are never printed. Matched
+ * narrowly on purpose: `public-key` is public, `key-usage` is a
+ * certificate flag, and `passive` / `passthrough` merely start with the
+ * same letters, so none of them are redacted.
+ *
+ * @param {string} key the attribute name
+ * @return {bool} true when the value must not be printed
+ * @internal
+ */
+func isSecretKey(key as string) {
+    if ($key == "password" or $key == "secret" or $key == "passphrase") {
+        return true;
+    }
+    if ($key == "private-key" or strings.endsWith($key, "-private-key")) {
+        return true;
+    }
+    if (strings.endsWith($key, "-password") or strings.endsWith($key, "-secret")) {
+        return true;
+    }
+    if (strings.endsWith($key, ".passphrase") or strings.endsWith($key, "-passphrase")) {
+        return true;
+    }
+    return strings.contains($key, "pre-shared-key");
+}
+
+/**
+ * Read the initial verbose flag from the environment.
+ *
+ * @return {bool} true when MT_VERBOSE is set to an affirmative value
+ * @internal
+ */
+func verboseFromEnv() {
+    return truthyWord(os.getEnv("MT_VERBOSE"));
+}
+
+/**
+ * Read an environment-style flag: is this string an affirmative?
+ *
+ * Case- and space-insensitive; anything unrecognised (including "" for
+ * an unset variable) is false, so a stray value never silently turns
+ * logging on.
+ *
+ * @param {string} raw the raw value
+ * @return {bool} true for "1" / "yes" / "true" / "on"
+ * @internal
+ */
+func truthyWord(raw as string) {
+    def v as string init strings.lower(strings.trim($raw));
+    return $v == "1" or $v == "yes" or $v == "true" or $v == "on";
 }

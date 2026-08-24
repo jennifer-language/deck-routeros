@@ -78,7 +78,7 @@ export func upnpInterfaces(c as Client) {
  *   mt.setUpnpInterface($c, "brlan", "internal");
  */
 export func enableUpnp(c as Client) {
-    mikrotik.run($c.session, UPNP_PATH + "/set", {"enabled": "yes"});
+    apiRun($c, UPNP_PATH + "/set", {"enabled": "yes"});
 }
 
 /**
@@ -87,7 +87,7 @@ export func enableUpnp(c as Client) {
  * @param {Client} c an open client
  */
 export func disableUpnp(c as Client) {
-    mikrotik.run($c.session, UPNP_PATH + "/set", {"enabled": "no"});
+    apiRun($c, UPNP_PATH + "/set", {"enabled": "no"});
 }
 
 /**

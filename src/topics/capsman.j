@@ -95,11 +95,11 @@ export func capsmanStatus(c as Client) {
  */
 export func enableCapsman(c as Client) {
     if (len(tryFirstRow($c, WIFI_CAPSMAN_PATH)) > 0) {
-        mikrotik.run($c.session, WIFI_CAPSMAN_PATH + "/set", {"enabled": "yes"});
+        apiRun($c, WIFI_CAPSMAN_PATH + "/set", {"enabled": "yes"});
         return;
     }
     if (len(tryFirstRow($c, CAPSMAN_PATH)) > 0) {
-        mikrotik.run($c.session, CAPSMAN_PATH + "/set", {"enabled": "yes"});
+        apiRun($c, CAPSMAN_PATH + "/set", {"enabled": "yes"});
         return;
     }
     raiseError("this router has no CAPsMAN menu (needs the wireless or wifiwave2 package)");
@@ -113,11 +113,11 @@ export func enableCapsman(c as Client) {
  */
 export func disableCapsman(c as Client) {
     if (len(tryFirstRow($c, WIFI_CAPSMAN_PATH)) > 0) {
-        mikrotik.run($c.session, WIFI_CAPSMAN_PATH + "/set", {"enabled": "no"});
+        apiRun($c, WIFI_CAPSMAN_PATH + "/set", {"enabled": "no"});
         return;
     }
     if (len(tryFirstRow($c, CAPSMAN_PATH)) > 0) {
-        mikrotik.run($c.session, CAPSMAN_PATH + "/set", {"enabled": "no"});
+        apiRun($c, CAPSMAN_PATH + "/set", {"enabled": "no"});
         return;
     }
     raiseError("this router has no CAPsMAN menu (needs the wireless or wifiwave2 package)");

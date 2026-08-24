@@ -343,3 +343,116 @@ func failEnsureHostSpaces() {
 func testEnsureHostRejectsSpaces() {
     testing.assertThrows("failEnsureHostSpaces", "routeros");
 }
+
+# a self-move is caught before the request reaches the router, so the
+# zero-value client is never dialled
+func failMoveRuleOntoItself() {
+    def c as Client;
+    moveRule($c, "/ip/firewall/filter", "*A", "*A");
+}
+
+func testMoveRuleRejectsSelfMove() {
+    testing.assertThrows("failMoveRuleOntoItself", "routeros");
+}
+
+func failMoveRuleEmptyId() {
+    def c as Client;
+    moveRule($c, "/ip/firewall/filter", "   ", "*A");
+}
+
+func testMoveRuleRejectsEmptyId() {
+    testing.assertThrows("failMoveRuleEmptyId", "routeros");
+}
+
+func failMoveRuleEmptyPath() {
+    def c as Client;
+    moveRule($c, "", "*A", "*B");
+}
+
+func testMoveRuleRejectsEmptyPath() {
+    testing.assertThrows("failMoveRuleEmptyPath", "routeros");
+}
+
+func testSetVerboseReturnsACopy() {
+    def c as Client;
+    testing.assertFalse(isVerbose($c));
+    def loud as Client init setVerbose($c, true);
+    testing.assertTrue(isVerbose($loud));
+    # value semantics: the original is untouched
+    testing.assertFalse(isVerbose($c));
+    testing.assertEqual($loud.user, $c.user);
+}
+
+func testSetVerboseCanTurnItOffAgain() {
+    def c as Client;
+    def loud as Client init setVerbose($c, true);
+    def quiet as Client init setVerbose($loud, false);
+    testing.assertTrue(isVerbose($loud));
+    testing.assertFalse(isVerbose($quiet));
+}
+
+func testFormatAttrsRendersPairsInOrder() {
+    def attrs as map of string to string init {"chain": "forward", "action": "drop"};
+    testing.assertEqual(formatAttrs($attrs), " chain=forward action=drop");
+}
+
+func testFormatAttrsEmptyIsEmptyString() {
+    def attrs as map of string to string init {};
+    testing.assertEqual(formatAttrs($attrs), "");
+}
+
+func testFormatQueries() {
+    def q as list of string init ["?name=ether1"];
+    testing.assertEqual(formatQueries($q), " ?name=ether1");
+    def none as list of string init [];
+    testing.assertEqual(formatQueries($none), "");
+}
+
+# verbose mode prints what goes on the wire, and that includes credentials
+func testSecretKeysAreRedacted() {
+    testing.assertTrue(isSecretKey("password"));
+    testing.assertTrue(isSecretKey("secret"));
+    testing.assertTrue(isSecretKey("passphrase"));
+    testing.assertTrue(isSecretKey("ipsec-secret"));
+    testing.assertTrue(isSecretKey("private-key"));
+    testing.assertTrue(isSecretKey("wpa2-pre-shared-key"));
+    testing.assertTrue(isSecretKey("wpa-pre-shared-key"));
+    testing.assertTrue(isSecretKey("security.passphrase"));
+}
+
+# the near-misses: none of these carry a credential
+func testNonSecretKeysAreNotRedacted() {
+    testing.assertFalse(isSecretKey("public-key"));
+    testing.assertFalse(isSecretKey("key-usage"));
+    testing.assertFalse(isSecretKey("passive"));
+    testing.assertFalse(isSecretKey("passthrough"));
+    testing.assertFalse(isSecretKey("user"));
+    testing.assertFalse(isSecretKey("address"));
+}
+
+func testFormatAttrsRedactsTheValueNotTheKey() {
+    def attrs as map of string to string init {"user": "router", "password": "hunter2"};
+    testing.assertEqual(formatAttrs($attrs), " user=router password=<redacted>");
+}
+
+func testLoggedValuePassesThroughOrdinaryValues() {
+    testing.assertEqual(loggedValue("address", "192.168.88.1/24"), "192.168.88.1/24");
+    testing.assertEqual(loggedValue("password", "hunter2"), "<redacted>");
+}
+
+func testTruthyWordAcceptsAffirmatives() {
+    testing.assertTrue(truthyWord("1"));
+    testing.assertTrue(truthyWord("yes"));
+    testing.assertTrue(truthyWord("true"));
+    testing.assertTrue(truthyWord("on"));
+    testing.assertTrue(truthyWord("  YES  "));
+    testing.assertTrue(truthyWord("True"));
+}
+
+func testTruthyWordRejectsEverythingElse() {
+    testing.assertFalse(truthyWord(""));
+    testing.assertFalse(truthyWord("0"));
+    testing.assertFalse(truthyWord("no"));
+    testing.assertFalse(truthyWord("false"));
+    testing.assertFalse(truthyWord("maybe"));
+}

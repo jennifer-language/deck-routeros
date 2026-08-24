@@ -103,7 +103,7 @@ export func addContainer(c as Client, name as string, remoteImage as string, int
  * @throws {Error} kind "routeros" when no such container exists
  */
 export func startContainer(c as Client, name as string) {
-    mikrotik.run($c.session, CONTAINER_PATH + "/start", {".id": requiredContainerId($c, $name)});
+    apiRun($c, CONTAINER_PATH + "/start", {".id": requiredContainerId($c, $name)});
 }
 
 /**
@@ -114,7 +114,7 @@ export func startContainer(c as Client, name as string) {
  * @throws {Error} kind "routeros" when no such container exists
  */
 export func stopContainer(c as Client, name as string) {
-    mikrotik.run($c.session, CONTAINER_PATH + "/stop", {".id": requiredContainerId($c, $name)});
+    apiRun($c, CONTAINER_PATH + "/stop", {".id": requiredContainerId($c, $name)});
 }
 
 /**

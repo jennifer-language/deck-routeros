@@ -108,3 +108,45 @@ func testSystemInfoFromRow() {
     testing.assertEqual($info.freeMemory, "845611008");
     testing.assertEqual($info.totalMemory, "1073741824");
 }
+
+func testDeviceModeFromRow() {
+    def row as map of string to string init {
+        "mode": "advanced",
+        "flagging-enabled": "true",
+        "container": "true",
+        "scheduler": "true",
+        "fetch": "true",
+        "email": "true",
+        "socks": "false",
+        "install-any-version": "false"
+    };
+    def d as DeviceMode init deviceModeFromRow($row);
+    testing.assertEqual($d.mode, "advanced");
+    testing.assertTrue($d.container);
+    testing.assertTrue($d.scheduler);
+    testing.assertFalse($d.socks);
+    testing.assertFalse($d.installAnyVersion);
+}
+
+func testDeviceModeFromHomeRow() {
+    def row as map of string to string init {"mode": "home"};
+    def d as DeviceMode init deviceModeFromRow($row);
+    testing.assertEqual($d.mode, "home");
+    testing.assertFalse($d.scheduler);
+    testing.assertFalse($d.container);
+}
+
+func testEnsureDeviceModeAcceptsConstants() {
+    ensureDeviceMode(DEVICE_MODE_HOME);
+    ensureDeviceMode(DEVICE_MODE_ADVANCED);
+    ensureDeviceMode(DEVICE_MODE_ENTERPRISE);
+    testing.assertTrue(true);
+}
+
+func failDeviceModeUnknown() {
+    ensureDeviceMode("developer");
+}
+
+func testEnsureDeviceModeRejectsUnknown() {
+    testing.assertThrows("failDeviceModeUnknown", "routeros");
+}

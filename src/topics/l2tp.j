@@ -77,7 +77,7 @@ export func enableL2tpServer(c as Client, ipsecSecret as string) {
     if (strings.trim($ipsecSecret) == "") {
         raiseError("the IPsec secret must not be empty - L2TP without it is cleartext");
     }
-    mikrotik.run($c.session, L2TP_SERVER_PATH + "/set",
+    apiRun($c, L2TP_SERVER_PATH + "/set",
         {"enabled": "yes", "use-ipsec": "required", "ipsec-secret": $ipsecSecret});
     ensureInputAccept($c, "l2tp: server (l2tp)", {"protocol": "udp", "dst-port": "1701"});
     ensureInputAccept($c, "l2tp: server (ike)", {"protocol": "udp", "dst-port": "500"});
@@ -91,7 +91,7 @@ export func enableL2tpServer(c as Client, ipsecSecret as string) {
  * @param {Client} c an open client
  */
 export func disableL2tpServer(c as Client) {
-    mikrotik.run($c.session, L2TP_SERVER_PATH + "/set", {"enabled": "no"});
+    apiRun($c, L2TP_SERVER_PATH + "/set", {"enabled": "no"});
     removeInputAcceptsByPrefix($c, "l2tp: server (");
 }
 

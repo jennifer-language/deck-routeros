@@ -105,7 +105,7 @@ export func enableSnmp(c as Client, community as string, addresses as string) {
     } else {
         set($c, SNMP_COMMUNITY_PATH, $id, $attrs);
     }
-    mikrotik.run($c.session, SNMP_PATH + "/set", {"enabled": "yes"});
+    apiRun($c, SNMP_PATH + "/set", {"enabled": "yes"});
     return $id;
 }
 
@@ -117,7 +117,7 @@ export func enableSnmp(c as Client, community as string, addresses as string) {
  * @param {string} location where the box is (e.g. "rack 3, office Berlin")
  */
 export func setSnmpInfo(c as Client, contact as string, location as string) {
-    mikrotik.run($c.session, SNMP_PATH + "/set",
+    apiRun($c, SNMP_PATH + "/set",
         {"contact": $contact, "location": $location});
 }
 
@@ -127,7 +127,7 @@ export func setSnmpInfo(c as Client, contact as string, location as string) {
  * @param {Client} c an open client
  */
 export func disableSnmp(c as Client) {
-    mikrotik.run($c.session, SNMP_PATH + "/set", {"enabled": "no"});
+    apiRun($c, SNMP_PATH + "/set", {"enabled": "no"});
 }
 
 /**

@@ -125,7 +125,7 @@ export func setIdentity(c as Client, name as string) {
     if (strings.trim($name) == "") {
         raiseError("the router name must not be empty");
     }
-    mikrotik.run($c.session, SYSTEM_IDENTITY_PATH + "/set", {"name": $name});
+    apiRun($c, SYSTEM_IDENTITY_PATH + "/set", {"name": $name});
 }
 
 /**
@@ -161,7 +161,7 @@ export func packages(c as Client) {
 export func checkForUpdates(c as Client) {
     def none as map of string to string init {};
     def rows as list of map of string to string init
-        mikrotik.talk($c.session, SYSTEM_UPDATE_PATH + "/check-for-updates", $none);
+        apiTalk($c, SYSTEM_UPDATE_PATH + "/check-for-updates", $none);
     return updateStatusFromRow(mergeRows($rows));
 }
 
@@ -178,7 +178,7 @@ export func checkForUpdates(c as Client) {
 export func downloadUpdates(c as Client) {
     def none as map of string to string init {};
     def rows as list of map of string to string init
-        mikrotik.talk($c.session, SYSTEM_UPDATE_PATH + "/download", $none);
+        apiTalk($c, SYSTEM_UPDATE_PATH + "/download", $none);
     return updateStatusFromRow(mergeRows($rows));
 }
 
@@ -222,7 +222,7 @@ export func routerboard(c as Client) {
  */
 export func upgradeRouterboard(c as Client) {
     def none as map of string to string init {};
-    mikrotik.run($c.session, SYSTEM_ROUTERBOARD_PATH + "/upgrade", $none);
+    apiRun($c, SYSTEM_ROUTERBOARD_PATH + "/upgrade", $none);
 }
 
 /**
@@ -270,7 +270,7 @@ export func shutdown(c as Client) {
 func runSystemCommand(c as Client, command as string) {
     def none as map of string to string init {};
     try {
-        mikrotik.run($c.session, $command, $none);
+        apiRun($c, $command, $none);
     } catch (e) {
         if ($e.kind == "mikrotik") {
             throw $e;
@@ -355,4 +355,124 @@ func systemInfoFromRow(row as map of string to string) {
         freeMemory: rowValue($row, "free-memory"),
         totalMemory: rowValue($row, "total-memory")
     };
+}
+
+/** RouterOS API path of the device-mode settings. */
+export def const DEVICE_MODE_PATH as string init "/system/device-mode";
+
+/** RouterOS API command that requests a device-mode change. */
+export def const DEVICE_MODE_UPDATE_COMMAND as string init "/system/device-mode/update";
+
+/** Device mode: the locked-down factory default on most models. */
+export def const DEVICE_MODE_HOME as string init "home";
+
+/** Device mode: unlocks container, scheduler, fetch, e-mail and friends. */
+export def const DEVICE_MODE_ADVANCED as string init "advanced";
+
+/** Device mode: everything unlocked, for managed deployments. */
+export def const DEVICE_MODE_ENTERPRISE as string init "enterprise";
+
+/**
+ * The router's device mode and the features it gates.
+ *
+ * @field {string} mode              the active mode ("home" / "advanced" / "enterprise")
+ * @field {bool}   flaggingEnabled   true when tamper flagging is on
+ * @field {bool}   container         true when containers may run
+ * @field {bool}   scheduler         true when the scheduler may run scripts
+ * @field {bool}   fetch             true when /tool/fetch is allowed
+ * @field {bool}   email             true when the router may send e-mail
+ * @field {bool}   socks             true when the SOCKS proxy is allowed
+ * @field {bool}   installAnyVersion true when downgrades are permitted
+ */
+export def struct DeviceMode {
+    mode as string,
+    flaggingEnabled as bool,
+    container as bool,
+    scheduler as bool,
+    fetch as bool,
+    email as bool,
+    socks as bool,
+    installAnyVersion as bool
+};
+
+/**
+ * Read the router's device mode.
+ *
+ * Worth checking first when a feature "does not exist": on a router in
+ * `home` mode the scheduler, fetch, e-mail and containers are gated off
+ * and the API reports them missing rather than refused.
+ *
+ * @param {Client} c an open client
+ * @return {DeviceMode} the active mode and its feature flags
+ * @example
+ *   def d as mt.DeviceMode init mt.deviceMode($c);
+ *   if (not $d.scheduler) { io.printf("scheduler is gated off in %s mode\n", $d.mode); }
+ */
+export func deviceMode(c as Client) {
+    return deviceModeFromRow(singleRow($c, DEVICE_MODE_PATH));
+}
+
+/**
+ * Request a device-mode change.
+ *
+ * THIS CALL DOES NOT FINISH THE JOB. RouterOS deliberately requires
+ * physical proof that whoever asked for the change is standing at the
+ * router: after this returns, the change is only *pending*, and the
+ * router applies it when someone power-cycles it (a cold boot - not
+ * `reboot`) or presses the reset button, within a few minutes. Miss
+ * that window and the request is discarded silently, leaving the mode
+ * as it was. So do not call this from an unattended script and expect
+ * the mode to change, and do not follow it with `reboot` - a soft
+ * reboot is not the confirmation the router is waiting for.
+ *
+ * Raising the mode (`home` -> `advanced` -> `enterprise`) is what needs
+ * confirmation because it unlocks code execution; check the result with
+ * `deviceMode` once the router is back.
+ *
+ * @param {Client} c    an open client
+ * @param {string} mode one of the DEVICE_MODE_* constants
+ * @throws {Error} kind "routeros" on an unknown mode, kind "mikrotik"
+ *                 when the router refuses the request
+ * @example
+ *   mt.updateDeviceMode($c, mt.DEVICE_MODE_ADVANCED);
+ *   # now power-cycle the router, then:
+ *   #   io.printf("%s\n", mt.deviceMode($c).mode);
+ */
+export func updateDeviceMode(c as Client, mode as string) {
+    def target as string init strings.trim($mode);
+    ensureDeviceMode($target);
+    apiRun($c, DEVICE_MODE_UPDATE_COMMAND, {"mode": $target});
+}
+
+/**
+ * Fold a reply row into a DeviceMode.
+ *
+ * @param {map of string to string} row a "/system/device-mode/print" row
+ * @return {DeviceMode} the typed mode
+ * @internal
+ */
+func deviceModeFromRow(row as map of string to string) {
+    return DeviceMode{
+        mode: rowValue($row, "mode"),
+        flaggingEnabled: rowBool($row, "flagging-enabled"),
+        container: rowBool($row, "container"),
+        scheduler: rowBool($row, "scheduler"),
+        fetch: rowBool($row, "fetch"),
+        email: rowBool($row, "email"),
+        socks: rowBool($row, "socks"),
+        installAnyVersion: rowBool($row, "install-any-version")
+    };
+}
+
+/**
+ * Validate a device mode against the DEVICE_MODE_* constants.
+ *
+ * @param {string} mode the candidate mode
+ * @throws {Error} kind "routeros" on an unknown mode
+ * @internal
+ */
+func ensureDeviceMode(mode as string) {
+    if ($mode != DEVICE_MODE_HOME and $mode != DEVICE_MODE_ADVANCED and $mode != DEVICE_MODE_ENTERPRISE) {
+        raiseError("\"" + $mode + "\" is not a device mode - use DEVICE_MODE_HOME, DEVICE_MODE_ADVANCED, or DEVICE_MODE_ENTERPRISE");
+    }
 }

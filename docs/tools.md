@@ -97,12 +97,32 @@ mt.downloadFile($c, "https://example.org/config.rsc", "config.rsc");   # to stor
 ```
 
 **E-mail** — configure SMTP once, then the router (or its scripts) can
-alert:
+alert. Almost every real relay wants TLS, so reach for
+`configureEmailWith` and its `EMAIL_TLS_*` mode; the server may be a DNS
+name or an IP:
 
 ```jennifer
-mt.configureEmail($c, "10.0.9.25", 587, "router@example.org", "router", "secret");
+mt.configureEmailWith($c, "smtp.example.org", 587,
+    "[MikroTik gw1] <router@example.org>", "router", "secret",
+    mt.EMAIL_TLS_STARTTLS);
 mt.sendEmail($c, "noc@example.org", "WAN down", "the primary uplink just failed");
 ```
+
+`configureEmail(c, server, port, from, user, password)` is the same call
+without the TLS argument, leaving the router's current mode alone.
+`emailSettings(c)` reads the configuration back as an `EmailSettings`
+(the password is write-only and never returned):
+
+```jennifer
+def e as mt.EmailSettings init mt.emailSettings($c);
+if ($e.tls == mt.EMAIL_TLS_NONE) { io.printf("alerts leave in the clear\n"); }
+```
+
+RouterOS 7.12 renamed these properties (`address` → `server`,
+`start-tls` → `tls`). Both calls read the router's own settings row
+first and write whichever spelling it uses, so one call works across
+versions — on a pre-7.12 router `EMAIL_TLS_STARTTLS` becomes
+`start-tls=yes` and `EMAIL_TLS_IMPLICIT` becomes `start-tls=tls-only`.
 
 Pair `sendEmail` with [scheduler.md](scheduler.md) (a nightly report) or
 [netwatch.md](netwatch.md) (a down-script that mails an alert) to turn

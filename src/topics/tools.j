@@ -16,6 +16,34 @@ export def const FETCH_COMMAND as string init "/tool/fetch";
 /** RouterOS API path of the e-mail (SMTP) settings. */
 export def const EMAIL_PATH as string init "/tool/e-mail";
 
+/** E-mail transport security: no encryption at all. */
+export def const EMAIL_TLS_NONE as string init "no";
+
+/** E-mail transport security: STARTTLS, upgrade a plain session (port 587). */
+export def const EMAIL_TLS_STARTTLS as string init "starttls";
+
+/** E-mail transport security: TLS from the first byte (implicit, port 465). */
+export def const EMAIL_TLS_IMPLICIT as string init "yes";
+
+/**
+ * The router's outgoing e-mail (SMTP) settings, as read back.
+ *
+ * The password is absent by design - RouterOS stores it write-only.
+ *
+ * @field {string} server the SMTP server (DNS name or IP), "" when unset
+ * @field {int}    port   the SMTP port, 0 when unset
+ * @field {string} from   the From: address
+ * @field {string} user   the SMTP login, "" when the relay needs none
+ * @field {string} tls    one of the EMAIL_TLS_* values
+ */
+export def struct EmailSettings {
+    server as string,
+    port as int,
+    from as string,
+    user as string,
+    tls as string
+};
+
 /** RouterOS API command that runs a throughput test against a btest server. */
 export def const BANDWIDTH_TEST_COMMAND as string init "/tool/bandwidth-test";
 
@@ -105,7 +133,7 @@ export func pingWith(c as Client, host as string, count as int) {
     if ($count < 1 or $count > 100) {
         raiseError("the ping count must be between 1 and 100");
     }
-    def rows as list of map of string to string init mikrotik.talk($c.session, PING_COMMAND,
+    def rows as list of map of string to string init apiTalk($c, PING_COMMAND,
         {"address": $target, "count": convert.toString($count)});
     return pingResultFromRow(mergeRows($rows));
 }
@@ -215,7 +243,7 @@ func bandwidthRun(c as Client, host as string, seconds as int, direction as stri
         $attrs["password"] = $password;
     }
     def rows as list of map of string to string init
-        mikrotik.talk($c.session, BANDWIDTH_TEST_COMMAND, $attrs);
+        apiTalk($c, BANDWIDTH_TEST_COMMAND, $attrs);
     return bandwidthResultFromRow(mergeRows($rows));
 }
 
@@ -303,7 +331,7 @@ export def struct FetchResult {
 export func traceroute(c as Client, host as string) {
     def target as string init strings.trim($host);
     ensureHost($target);
-    def rows as list of map of string to string init mikrotik.talk($c.session,
+    def rows as list of map of string to string init apiTalk($c,
         TRACEROUTE_COMMAND, {"address": $target, "count": "1"});
     def out as list of TracerouteHop init [];
     for (def row in $rows) {
@@ -334,7 +362,7 @@ export func fetchUrl(c as Client, url as string) {
     if ($target == "" or not strings.startsWith($target, "http")) {
         raiseError("the fetch URL must be an http(s) URL");
     }
-    def rows as list of map of string to string init mikrotik.talk($c.session,
+    def rows as list of map of string to string init apiTalk($c,
         FETCH_COMMAND, {"url": $target, "output": "user", "mode": "https"});
     return fetchResultFromRow(mergeRows($rows));
 }
@@ -354,7 +382,7 @@ export func downloadFile(c as Client, url as string, fileName as string) {
         raiseError("the download URL must be an http(s) URL");
     }
     ensureName($fileName, "file");
-    def rows as list of map of string to string init mikrotik.talk($c.session,
+    def rows as list of map of string to string init apiTalk($c,
         FETCH_COMMAND, {"url": $target, "dst-path": $fileName, "mode": "https"});
     return fetchResultFromRow(mergeRows($rows));
 }
@@ -374,17 +402,95 @@ export func downloadFile(c as Client, url as string, fileName as string) {
  * @throws {Error} kind "routeros" on a bad server or port
  */
 export func configureEmail(c as Client, server as string, port as int, from as string, user as string, password as string) {
-    ensureIpAddress($server);
+    configureEmailWith($c, $server, $port, $from, $user, $password, "");
+}
+
+/**
+ * Configure outgoing e-mail, choosing the transport security.
+ *
+ * The same as `configureEmail` plus the `tls` mode, which is what
+ * almost every real SMTP relay needs: `EMAIL_TLS_STARTTLS` on port 587
+ * (the common case - Gmail, Office 365, most providers),
+ * `EMAIL_TLS_IMPLICIT` on port 465, `EMAIL_TLS_NONE` for an internal
+ * relay that takes plain SMTP. Pass "" to leave the router's current
+ * setting alone.
+ *
+ * `server` may be a DNS name (`smtp.example.org`) or an IP address -
+ * the router resolves it. The password is write-only: it is stored on
+ * the router and never read back by `emailSettings`.
+ *
+ * RouterOS renamed these properties in 7.12 (`address` became `server`,
+ * `start-tls` became `tls`). This reads the router's own settings row
+ * first and writes whichever spelling it uses, so one call works across
+ * versions; on a pre-7.12 router `EMAIL_TLS_STARTTLS` maps to
+ * `start-tls=yes` and `EMAIL_TLS_IMPLICIT` to `start-tls=tls-only`.
+ *
+ * @param {Client} c        an open client
+ * @param {string} server   the SMTP server (DNS name or IP)
+ * @param {int}    port     the SMTP port (587 for STARTTLS, 465 implicit, 25 plain)
+ * @param {string} from     the From: address
+ * @param {string} user     the SMTP login ("" for an open relay)
+ * @param {string} password the SMTP password ("" when no auth)
+ * @param {string} tls      one of the EMAIL_TLS_* constants, or "" to leave it
+ * @throws {Error} kind "routeros" on an empty/spaced server, a bad port,
+ *                 or an unknown tls mode
+ * @example
+ *   mt.configureEmailWith($c, "smtp.example.org", 587,
+ *       "[MikroTik gw1] <router@example.org>", "router", "secret",
+ *       mt.EMAIL_TLS_STARTTLS);
+ */
+export func configureEmailWith(c as Client, server as string, port as int, from as string, user as string, password as string, tls as string) {
+    def host as string init strings.trim($server);
+    ensureHost($host);
     ensurePort($port);
+    def mode as string init strings.trim($tls);
+    if ($mode != "") {
+        ensureEmailTls($mode);
+    }
+    def names as map of string to string init emailPropertyNames($c);
     def attrs as map of string to string init
-        {"address": strings.trim($server), "port": convert.toString($port), "from": $from};
+        {"port": convert.toString($port), "from": $from};
+    $attrs[$names["server"]] = $host;
     if ($user != "") {
         $attrs["user"] = $user;
     }
     if ($password != "") {
         $attrs["password"] = $password;
     }
-    mikrotik.run($c.session, EMAIL_PATH + "/set", $attrs);
+    if ($mode != "") {
+        $attrs[$names["tls"]] = emailTlsWord($mode, $names["tls"]);
+    }
+    apiRun($c, EMAIL_PATH + "/set", $attrs);
+}
+
+/**
+ * Read the router's current outgoing e-mail settings.
+ *
+ * The password is never returned - RouterOS stores it write-only.
+ *
+ * @param {Client} c an open client
+ * @return {EmailSettings} the current settings
+ * @example
+ *   def s as mt.EmailSettings init mt.emailSettings($c);
+ *   if ($s.tls == mt.EMAIL_TLS_NONE) { io.printf("alerts go out in the clear\n"); }
+ */
+export func emailSettings(c as Client) {
+    def row as map of string to string init singleRow($c, EMAIL_PATH);
+    def server as string init rowValue($row, "server");
+    if ($server == "") {
+        $server = rowValue($row, "address");
+    }
+    def tls as string init rowValue($row, "tls");
+    if ($tls == "") {
+        $tls = modernTlsWord(rowValue($row, "start-tls"));
+    }
+    return EmailSettings{
+        server: $server,
+        port: rowInt($row, "port"),
+        from: rowValue($row, "from"),
+        user: rowValue($row, "user"),
+        tls: $tls
+    };
 }
 
 /**
@@ -409,7 +515,7 @@ export func sendEmail(c as Client, recipient as string, subject as string, body 
     if ($target == "") {
         raiseError("the recipient must not be empty");
     }
-    mikrotik.run($c.session, EMAIL_PATH + "/send",
+    apiRun($c, EMAIL_PATH + "/send",
         {"to": $target, "subject": $subject, "body": $body});
 }
 
@@ -446,4 +552,82 @@ func fetchResultFromRow(row as map of string to string) {
         downloaded: rowValue($row, "downloaded"),
         data: rowValue($row, "data")
     };
+}
+
+/**
+ * Decide which spelling of the e-mail properties this router uses.
+ *
+ * RouterOS 7.12 renamed `address` to `server` and `start-tls` to `tls`.
+ * Rather than guessing from a version string, read the settings row and
+ * look at which keys are actually there - a router that reports
+ * `address` is pre-7.12. An unreadable or empty row falls through to
+ * the modern names.
+ *
+ * @param {Client} c an open client
+ * @return {map of string to string} keys "server" and "tls" mapped to the
+ *         property names to write
+ * @internal
+ */
+func emailPropertyNames(c as Client) {
+    def modern as map of string to string init {"server": "server", "tls": "tls"};
+    def legacy as map of string to string init {"server": "address", "tls": "start-tls"};
+    def row as map of string to string init singleRow($c, EMAIL_PATH);
+    if (maps.has($row, "address") and not maps.has($row, "server")) {
+        return $legacy;
+    }
+    return $modern;
+}
+
+/**
+ * Validate an e-mail TLS mode against the EMAIL_TLS_* constants.
+ *
+ * @param {string} mode the candidate mode
+ * @throws {Error} kind "routeros" on an unknown mode
+ * @internal
+ */
+func ensureEmailTls(mode as string) {
+    if ($mode != EMAIL_TLS_NONE and $mode != EMAIL_TLS_STARTTLS and $mode != EMAIL_TLS_IMPLICIT) {
+        raiseError("\"" + $mode + "\" is not a TLS mode - use EMAIL_TLS_NONE, EMAIL_TLS_STARTTLS, or EMAIL_TLS_IMPLICIT");
+    }
+}
+
+/**
+ * Render a TLS mode for the property name the router actually takes.
+ *
+ * Modern routers take the mode verbatim. Pre-7.12 `start-tls` spells the
+ * same three states `no` / `yes` (STARTTLS) / `tls-only` (implicit).
+ *
+ * @param {string} mode     an EMAIL_TLS_* value
+ * @param {string} property the property name chosen by `emailPropertyNames`
+ * @return {string} the value to send
+ * @internal
+ */
+func emailTlsWord(mode as string, property as string) {
+    if ($property != "start-tls") {
+        return $mode;
+    }
+    if ($mode == EMAIL_TLS_STARTTLS) {
+        return "yes";
+    }
+    if ($mode == EMAIL_TLS_IMPLICIT) {
+        return "tls-only";
+    }
+    return "no";
+}
+
+/**
+ * Fold a legacy `start-tls` reading back into an EMAIL_TLS_* value.
+ *
+ * @param {string} word the `start-tls` property value ("" when absent)
+ * @return {string} the matching EMAIL_TLS_* value
+ * @internal
+ */
+func modernTlsWord(word as string) {
+    if ($word == "yes") {
+        return EMAIL_TLS_STARTTLS;
+    }
+    if ($word == "tls-only") {
+        return EMAIL_TLS_IMPLICIT;
+    }
+    return EMAIL_TLS_NONE;
 }

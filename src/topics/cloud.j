@@ -48,9 +48,9 @@ export func cloudStatus(c as Client) {
  *                 cloud servers
  */
 export func enableCloudDns(c as Client) {
-    mikrotik.run($c.session, CLOUD_PATH + "/set", {"ddns-enabled": "yes"});
+    apiRun($c, CLOUD_PATH + "/set", {"ddns-enabled": "yes"});
     def none as map of string to string init {};
-    mikrotik.run($c.session, CLOUD_PATH + "/force-update", $none);
+    apiRun($c, CLOUD_PATH + "/force-update", $none);
 }
 
 /**
@@ -59,7 +59,7 @@ export func enableCloudDns(c as Client) {
  * @param {Client} c an open client
  */
 export func disableCloudDns(c as Client) {
-    mikrotik.run($c.session, CLOUD_PATH + "/set", {"ddns-enabled": "no"});
+    apiRun($c, CLOUD_PATH + "/set", {"ddns-enabled": "no"});
 }
 
 /**

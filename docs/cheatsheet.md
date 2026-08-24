@@ -20,11 +20,31 @@ def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
 `connectWith(host, port, user, password, tls)` → `Client`;
 `disconnect(c)`.
 
+**Verbose mode** — `setVerbose(c, enabled)` → `Client` prints every
+command the client sends to stdout before it goes out; `isVerbose(c)`
+reads the flag. It returns a **copy** (a Jennifer module holds no mutable
+state), so keep it: `$c = mt.setVerbose($c, true);`. `MT_VERBOSE=1`
+in the environment seeds it at `connect` time. Credentials
+(`password`, `secret`, `passphrase`, `private-key`, `*pre-shared-key*`,
+and the `-password` / `-secret` / `-passphrase` suffixes) print as
+`<redacted>`. Covers every command the module sends, reads included:
+
+```
+mt> /interface/bridge/add name=brlan
+mt> /ip/address/print
+mt< 3 rows
+mt> /tool/e-mail/set server=smtp.example.org password=<redacted>
+```
+
 **Generic verbs** (any RouterOS list path, e.g. `"/ip/address"`) —
 `getAll(c, path)`, `add(c, path, attrs)` → id, `set(c, path, id, attrs)`,
 `update` (synonym of `set`), `remove(c, path, id)` (RouterOS's delete),
 `removeByName(c, path, name)`, `findByName(c, path, name)`,
 `idByName(c, path, name)`, `enable(c, path, id)`, `disable(c, path, id)`.
+Ordered lists (the firewall tables, mangle, raw, simple queues) also take
+`moveRule(c, path, id, beforeId)` (`""` = the bottom),
+`moveRuleToTop(c, path, id)`, and `moveRuleToBottom(c, path, id)` — position
+is semantics in a list evaluated top to bottom.
 
 **Interfaces** — `interfaces(c)` → `list of Interface`,
 `interfaceByName(c, name)`, `enableInterface` / `disableInterface(c, name)`,
@@ -147,6 +167,9 @@ mt.enableVlanFiltering($c, "brlan");   # last
 `firewallRules(c)`; manage by the rule's comment with
 `removeFirewallRuleByComment`, `enableFirewallRuleByComment`,
 `disableFirewallRuleByComment`, or by id with `removeFirewallRule(c, id)`.
+Reorder with `moveFirewallRule(c, id, beforeId)` /
+`moveFirewallRuleByComment(c, comment, beforeComment)` — rules append, so
+this is how an accept gets back above a broad drop.
 Shortcuts: `allowService(c, protocol, port, comment)` and
 `blockAddress(c, address, comment)`. Interface-list matchers:
 `withInInterfaceList` / `withOutInterfaceList` (see Interface lists).
@@ -158,7 +181,8 @@ bogons, floods) or `notrack` traffic. Reuses the firewall builder
 `ACTION_NOTRACK`): `addRawRule(c, rule)` → id, the shortcut
 `dropRawAddressList(c, listName, comment)` → id (bogon/blocklist
 filtering), `rawRules(c)` → `list of RawRule`, `removeRawRule(c, id)` /
-`removeRawRuleByComment(c, comment)`.
+`removeRawRuleByComment(c, comment)`, `moveRawRule(c, id, beforeId)` /
+`moveRawRuleByComment(c, comment, beforeComment)`.
 
 ```jennifer
 mt.dropRawAddressList($c, "bogons", "drop bogons early");
@@ -243,6 +267,28 @@ mt.clampTcpMss($c, "pppoewan");
 **IP addresses** — `ipAddresses(c)` → `list of IpAddress`,
 `addIpAddress(c, address, interfaceName)` → id (address must carry its
 prefix, e.g. `"192.168.88.1/24"`), `removeIpAddress(c, address)`.
+
+**IPv6** — a second, independent stack: the `/ip/firewall` rules do *not*
+filter it. Settings: `ipv6Settings(c)` → `Ipv6Settings`, `disableIpv6(c)` /
+`enableIpv6(c)` (both need a reboot to fully apply),
+`setIpv6Forwarding(c, enabled)`,
+`setIpv6AcceptRouterAdvertisements(c, enabled)`. Addresses:
+`ipv6Addresses(c)` → `list of Ipv6Address`,
+`ipv6AddressesOn(c, interfaceName)`,
+`addIpv6Address(c, cidr, interfaceName)` → id,
+`addIpv6AddressWith(c, cidr, interfaceName, advertise, eui64)` → id,
+`removeIpv6Address(c, cidr)` (refuses the dynamic ones by name).
+Advertisements: `ipv6Nd(c)` → `list of Ipv6Nd`,
+`advertiseIpv6On(c, interfaceName)` → id (idempotent),
+`stopAdvertisingIpv6On(c, interfaceName)`,
+`setIpv6NdFlags(c, interfaceName, managed, otherConfig)` (the M and O
+flags). A LAN prefix is always a `/64` — SLAAC is defined for nothing else.
+
+```jennifer
+mt.addIpv6Address($c, "2001:db8:1::1/64", "brlan");
+mt.advertiseIpv6On($c, "brlan");
+mt.setIpv6NdFlags($c, "brlan", false, true);   # SLAAC, DNS from DHCPv6
+```
 
 **ARP table** — who is on the network: `arpTable(c)` →
 `list of ArpEntry` (doubles as a "who is on my LAN" list),
@@ -608,9 +654,15 @@ Plus `traceroute(c, host)` → `list of TracerouteHop` (the path, and
 where it breaks), `fetchUrl(c, url)` → `FetchResult` (the router fetches
 a URL — call a webhook, check its own public IP; body in `.data`),
 `downloadFile(c, url, fileName)` (save to storage), and e-mail alerting:
-`configureEmail(c, server, port, from, user, password)` once, then
+`configureEmailWith(c, server, port, from, user, password, tls)` once —
+`tls` one of `EMAIL_TLS_NONE` / `EMAIL_TLS_STARTTLS` / `EMAIL_TLS_IMPLICIT`,
+`server` a DNS name or an IP — then
 `sendEmail(c, recipient, subject, body)` (pairs with scheduler/netwatch
-for "WAN down" mails).
+for "WAN down" mails). `configureEmail(c, server, port, from, user,
+password)` is the same without the TLS argument; `emailSettings(c)` →
+`EmailSettings` reads it back (no password — it is write-only). RouterOS
+7.12 renamed these properties (`address` → `server`, `start-tls` → `tls`);
+both calls detect which spelling the router uses and write that one.
 
 ```jennifer
 if (not mt.isReachable($c, "1.1.1.1")) {
@@ -619,6 +671,19 @@ if (not mt.isReachable($c, "1.1.1.1")) {
 def hops as list of mt.TracerouteHop init mt.traceroute($c, "1.1.1.1");
 def ip as mt.FetchResult init mt.fetchUrl($c, "https://ifconfig.co/ip");
 if ($ip.ok) { io.printf("public IP: %s\n", $ip.data); }
+```
+
+**SMS (cellular modem)** — the alert path that survives a dead uplink.
+Reception is off by default: `smsSettings(c)` → `SmsSettings`,
+`enableSmsReceive(c, port)` (the modem port, e.g. `"lte1"`),
+`disableSmsReceive(c)`,
+`restrictSms(c, allowedNumber, keepMaxSms)` (RouterOS can *execute*
+commands sent by SMS — set the allowed sender),
+`sendSms(c, port, phoneNumber, message)`, `smsInbox(c)` →
+`list of SmsMessage`, `removeSmsMessage(c, id)`, `clearSmsInbox(c)` → int.
+
+```jennifer
+mt.sendSms($c, "lte1", "+441632960123", "gw1: uplink down");
 ```
 
 **Router users** — `users(c)` → `list of User`, `userGroups(c)`,
@@ -764,7 +829,14 @@ load, memory), `identity(c)` / `setIdentity(c, name)` (router name),
 reboot), `installUpdates(c)` (download, install, **reboots the
 router**). Firmware: `routerboard(c)` → `Routerboard` (check
 `.upgradeAvailable`), `upgradeRouterboard(c)` (stages the flash for the
-next reboot). Power: `reboot(c)`, `shutdown(c)`. The full update runs:
+next reboot). Power: `reboot(c)`, `shutdown(c)`. Device mode:
+`deviceMode(c)` → `DeviceMode` (which of scheduler / fetch / e-mail /
+container this router is allowed to run) and
+`updateDeviceMode(c, mode)` with `DEVICE_MODE_HOME` /
+`DEVICE_MODE_ADVANCED` / `DEVICE_MODE_ENTERPRISE` — that call only makes
+the change **pending**: the router applies it on a power cycle or a reset
+button press, not on `reboot(c)`, and discards it if nobody confirms.
+The full update runs:
 
 ```jennifer
 if (mt.checkForUpdates($c).updateAvailable) {
@@ -848,6 +920,9 @@ actions `ACTION_ACCEPT` / `ACTION_DROP` / `ACTION_REJECT`, NAT chains
 `IPSEC_PEER_PATH` / `IPSEC_IDENTITY_PATH` / `IPSEC_POLICY_PATH` /
 `IPSEC_ACTIVE_PATH` / `IPSEC_MODE_CONFIG_PATH` / `VRRP_PATH` /
 `PING_COMMAND` / `TRACEROUTE_COMMAND` / `FETCH_COMMAND` / `EMAIL_PATH` /
+`SMS_PATH` / `SMS_INBOX_PATH` / `SMS_SEND_COMMAND` /
+`IPV6_SETTINGS_PATH` / `IPV6_ADDRESS_PATH` / `IPV6_ND_PATH` /
+`DEVICE_MODE_PATH` / `DEVICE_MODE_UPDATE_COMMAND` /
 `BANDWIDTH_TEST_COMMAND` / `NETWATCH_PATH` /
 `IP_ADDRESS_PATH` / `IP_POOL_PATH` / `DHCP_SERVER_PATH` /
 `DHCP_NETWORK_PATH` / `DHCP_LEASE_PATH` / `DHCP_CLIENT_PATH` / `DHCP_RELAY_PATH` /
@@ -871,6 +946,9 @@ actions `ACTION_ACCEPT` / `ACTION_DROP` / `ACTION_REJECT`, NAT chains
 `SYSTEM_HEALTH_PATH` / `CONTAINER_PATH` /
 `LOG_PATH` /
 `LOGGING_PATH` / `LOGGING_ACTION_PATH` for use with the generic verbs.
+Value constants: e-mail transport `EMAIL_TLS_NONE` / `EMAIL_TLS_STARTTLS` /
+`EMAIL_TLS_IMPLICIT`, and device modes `DEVICE_MODE_HOME` /
+`DEVICE_MODE_ADVANCED` / `DEVICE_MODE_ENTERPRISE`.
 
 Input validation happens before anything reaches the router: IP
 addresses and CIDR networks are parsed with the stock `ipnet` module,
@@ -894,10 +972,10 @@ statements that splice in the topic files —
 `interfaces`, `interfacelist`, `lte`, `ethernet`, `bonding`, `bridges`,
 `switch`,
 `vlans`, `firewall`, `raw`, `nat`, `addresslist`, `mangle`, `contrack`,
-`ip`, `arp`, `neighbor`, `dhcp`, `ppp`, `l2tp`, `sstp`, `ovpn`, `hotspot`, `dns`,
+`ip`, `ipv6`, `arp`, `neighbor`, `dhcp`, `ppp`, `l2tp`, `sstp`, `ovpn`, `hotspot`, `dns`,
 `routing`, `upnp`, `trafficflow`, `queues`, `wireless`,
 `wifi` (wave2), `capsman`, `wireguard`, `eoip`, `gre`, `ipsec`, `vrrp`,
-`tools`, `netwatch`, `scheduler`, `script`, `users`, `services`,
+`tools`, `sms`, `netwatch`, `scheduler`, `script`, `users`, `services`,
 `certificates`, `clock`, `files`, `disk`, `cloud`, `snmp`, `radius`,
 `health`, `container`, `log`, and `system`. Since
 `include` is a textual splice, the module boundary (and every `export`)

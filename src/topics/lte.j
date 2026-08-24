@@ -90,7 +90,7 @@ export func lteInterfaces(c as Client) {
  */
 export func lteStatus(c as Client, name as string) {
     requiredId($c, LTE_PATH, $name, "LTE interface");
-    def rows as list of map of string to string init mikrotik.talk($c.session,
+    def rows as list of map of string to string init apiTalk($c,
         LTE_PATH + "/monitor", {"numbers": $name, "once": ""});
     return lteStatusFromRow(mergeRows($rows));
 }

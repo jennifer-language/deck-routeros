@@ -23,6 +23,12 @@ Errors: every validation failure raised by routeros is an
 from the router or the wire are `Error{kind: "mikrotik"}`. Catch either
 with `try { ... } catch (e) { io.printf("%s\n", $e.message); }`.
 
+Verbose mode: `$c = mt.setVerbose($c, true);` prints every command the
+client sends to stdout (`mt> /ip/address/add address=... interface=...`),
+with credentials redacted — see [core.md](core.md). It returns a copy, so
+keep the returned client. `MT_VERBOSE=1` in the environment turns it on
+at `connect` time without touching the script.
+
 Ids: RouterOS gives every list item an internal id like `"*3"`. The
 `add*` functions return it, the typed structs carry it in `.id`, and the
 generic verbs accept it. Most routeros helpers let you use a *name* or
@@ -56,6 +62,7 @@ official [RouterOS documentation](https://help.mikrotik.com/docs/).
 | [mangle.md](mangle.md) | packet marking: queue marks, policy routing, MSS clamp |
 | [contrack.md](contrack.md) | connection tracking: the live connection table |
 | [ip.md](ip.md) | IP addresses on interfaces |
+| [ipv6.md](ipv6.md) | IPv6: the stack switch, addresses, router advertisements |
 | [arp.md](arp.md) | the ARP table: who is on the LAN, pinned bindings |
 | [neighbor.md](neighbor.md) | neighbor discovery: what is on this segment (LLDP/CDP/MNDP) |
 | [dhcp.md](dhcp.md) | DHCP server, leases, and the WAN-side DHCP client |
@@ -72,7 +79,8 @@ official [RouterOS documentation](https://help.mikrotik.com/docs/).
 | [gre.md](gre.md) | GRE: routed site-to-site links, any vendor |
 | [ipsec.md](ipsec.md) | IPsec: standards-based site-to-site, multi-vendor |
 | [vrrp.md](vrrp.md) | VRRP: two routers, one gateway, automatic failover |
-| [tools.md](tools.md) | ping and bandwidth test from the router |
+| [tools.md](tools.md) | ping, bandwidth test, fetch, e-mail alerting |
+| [sms.md](sms.md) | text messages over the cellular modem |
 | [netwatch.md](netwatch.md) | continuous host monitoring with on-change scripts |
 | [scheduler.md](scheduler.md) | scripts on a timer |
 | [script.md](script.md) | the stored-script repository (run by name) |

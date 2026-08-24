@@ -113,7 +113,7 @@ export func ethernetPortByName(c as Client, name as string) {
  */
 export func linkStatus(c as Client, name as string) {
     requiredId($c, ETHERNET_PATH, $name, "ethernet port");
-    def rows as list of map of string to string init mikrotik.talk($c.session,
+    def rows as list of map of string to string init apiTalk($c,
         ETHERNET_PATH + "/monitor", {"numbers": $name, "once": ""});
     return linkStatusFromRow(mergeRows($rows));
 }

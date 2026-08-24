@@ -353,3 +353,49 @@ func mangleFromRow(row as map of string to string) {
         comment: rowValue($row, "comment")
     };
 }
+
+/**
+ * Move a mangle rule so it is evaluated directly before another one.
+ *
+ * Mangle order decides which mark sticks: the first matching rule marks
+ * the packet, and a later rule that would have marked it differently
+ * never runs unless the earlier one passes traffic through.
+ *
+ * @param {Client} c        an open client
+ * @param {string} id       the rule to move
+ * @param {string} beforeId the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" on an empty id or a self-move
+ */
+export func moveMangleRule(c as Client, id as string, beforeId as string) {
+    moveRule($c, MANGLE_PATH, $id, $beforeId);
+}
+
+/**
+ * Move the mangle rule carrying one comment above the rule carrying another.
+ *
+ * @param {Client} c             an open client
+ * @param {string} comment       the rule to move
+ * @param {string} beforeComment the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" when either comment matches no rule
+ */
+export func moveMangleRuleByComment(c as Client, comment as string, beforeComment as string) {
+    def target as string init mangleIdByComment($c, $comment);
+    def dest as string init "";
+    if (strings.trim($beforeComment) != "") {
+        $dest = mangleIdByComment($c, $beforeComment);
+    }
+    moveRule($c, MANGLE_PATH, $target, $dest);
+}
+
+/**
+ * Resolve a mangle rule comment to the rule's id.
+ *
+ * @param {Client} c       an open client
+ * @param {string} comment the rule's comment
+ * @return {string} the rule id
+ * @throws {Error} kind "routeros" when no mangle rule carries that comment
+ * @internal
+ */
+func mangleIdByComment(c as Client, comment as string) {
+    return requiredIdByComment($c, MANGLE_PATH, $comment, "mangle rule");
+}

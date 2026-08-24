@@ -115,12 +115,53 @@ export func removeRawRule(c as Client, id as string) {
  * @throws {Error} kind "routeros" when no raw rule carries that comment
  */
 export func removeRawRuleByComment(c as Client, comment as string) {
-    def rows as list of map of string to string init getAll($c, RAW_PATH);
-    def row as map of string to string init findRowByField($rows, "comment", $comment);
-    if (len($row) == 0) {
-        raiseError("no raw rule with the comment \"" + $comment + "\" was found");
+    remove($c, RAW_PATH, rawIdByComment($c, $comment));
+}
+
+/**
+ * Move a raw rule so it is evaluated directly before another one.
+ *
+ * The raw table is the cheapest place to drop traffic, and inside it
+ * order still decides: a `notrack` above a `drop` spares the connection
+ * tracker work the `drop` would have made pointless.
+ *
+ * @param {Client} c        an open client
+ * @param {string} id       the rule to move
+ * @param {string} beforeId the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" on an empty id or a self-move
+ */
+export func moveRawRule(c as Client, id as string, beforeId as string) {
+    moveRule($c, RAW_PATH, $id, $beforeId);
+}
+
+/**
+ * Move the raw rule carrying one comment above the rule carrying another.
+ *
+ * @param {Client} c             an open client
+ * @param {string} comment       the rule to move
+ * @param {string} beforeComment the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" when either comment matches no rule
+ */
+export func moveRawRuleByComment(c as Client, comment as string, beforeComment as string) {
+    def target as string init rawIdByComment($c, $comment);
+    def dest as string init "";
+    if (strings.trim($beforeComment) != "") {
+        $dest = rawIdByComment($c, $beforeComment);
     }
-    remove($c, RAW_PATH, rowValue($row, ".id"));
+    moveRule($c, RAW_PATH, $target, $dest);
+}
+
+/**
+ * Resolve a raw rule comment to the rule's id.
+ *
+ * @param {Client} c       an open client
+ * @param {string} comment the rule's comment
+ * @return {string} the rule id
+ * @throws {Error} kind "routeros" when no raw rule carries that comment
+ * @internal
+ */
+func rawIdByComment(c as Client, comment as string) {
+    return requiredIdByComment($c, RAW_PATH, $comment, "raw rule");
 }
 
 /**

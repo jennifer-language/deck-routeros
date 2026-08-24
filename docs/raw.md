@@ -34,6 +34,8 @@ mt.RawRule { id, chain, action, protocol, srcAddress, dstAddress,
 | `addRawRule(c, rule)` → id | create from a firewall-builder matcher |
 | `dropRawAddressList(c, listName, comment)` → id | drop a blocklist early |
 | `removeRawRule(c, id)` / `removeRawRuleByComment(c, comment)` | delete |
+| `moveRawRule(c, id, beforeId)` | reorder; `""` sends it to the bottom |
+| `moveRawRuleByComment(c, comment, beforeComment)` | the same, by comment handles |
 
 Build the matcher with `firewallRule(chain, action)` + the `with*`
 refiners — chain `CHAIN_PREROUTING`/`CHAIN_OUTPUT`, action
@@ -74,8 +76,10 @@ mt.addRawRule($c, $n);
   here (that is what tracking provides, and it hasn't run yet). Match on
   addresses, ports, interfaces, and address lists.
 - **Order and specificity matter** — a broad raw drop above a needed
-  accept blocks it; rules append, so place `accept` exceptions before
-  broad drops (build the accept first).
+  accept blocks it, and rules append. Either build the `accept` first,
+  or repair the order afterwards with `moveRawRule(c, id, beforeId)` /
+  `moveRawRuleByComment(c, comment, beforeComment)` (pass `""` as the
+  destination to send a rule to the bottom).
 - `notrack` disables NAT and stateful filtering for that traffic — use
   it deliberately, not as a performance dial.
 - Raw drops are invisible to conntrack tools ([contrack.md](contrack.md))

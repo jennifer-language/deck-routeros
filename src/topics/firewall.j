@@ -384,6 +384,46 @@ export func disableFirewallRuleByComment(c as Client, comment as string) {
 }
 
 /**
+ * Move a firewall rule so it is evaluated directly before another one.
+ *
+ * The filter chains are walked top to bottom and stop at the first
+ * match, so a rule added last sits below a broad drop and never fires.
+ * This lifts it back above that drop.
+ *
+ * @param {Client} c        an open client
+ * @param {string} id       the rule to move
+ * @param {string} beforeId the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" on an empty id or a self-move
+ * @example
+ *   def wg as string init mt.allowService($c, "udp", 13231, "wireguard in");
+ *   mt.moveFirewallRule($c, $wg, $dropEverythingElseId);
+ */
+export func moveFirewallRule(c as Client, id as string, beforeId as string) {
+    moveRule($c, FIREWALL_PATH, $id, $beforeId);
+}
+
+/**
+ * Move the firewall rule carrying one comment above the rule carrying
+ * another - the same reorder, addressed by the handles you named the
+ * rules with instead of by ids that change.
+ *
+ * @param {Client} c             an open client
+ * @param {string} comment       the rule to move
+ * @param {string} beforeComment the rule it must end up above, "" for the bottom
+ * @throws {Error} kind "routeros" when either comment matches no rule
+ * @example
+ *   mt.moveFirewallRuleByComment($c, "wireguard in", "drop everything else");
+ */
+export func moveFirewallRuleByComment(c as Client, comment as string, beforeComment as string) {
+    def target as string init firewallIdByComment($c, $comment);
+    def dest as string init "";
+    if (strings.trim($beforeComment) != "") {
+        $dest = firewallIdByComment($c, $beforeComment);
+    }
+    moveRule($c, FIREWALL_PATH, $target, $dest);
+}
+
+/**
  * Open one TCP or UDP service to the router itself.
  *
  * Shorthand for an accept rule on the input chain.
@@ -432,12 +472,7 @@ export func blockAddress(c as Client, address as string, comment as string) {
  * @internal
  */
 func firewallIdByComment(c as Client, comment as string) {
-    def rows as list of map of string to string init getAll($c, FIREWALL_PATH);
-    def row as map of string to string init findRowByField($rows, "comment", $comment);
-    if (len($row) == 0) {
-        raiseError("no firewall rule with the comment \"" + $comment + "\" was found");
-    }
-    return rowValue($row, ".id");
+    return requiredIdByComment($c, FIREWALL_PATH, $comment, "firewall rule");
 }
 
 /**

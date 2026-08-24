@@ -50,6 +50,8 @@ mt.MangleRule {
 | `clampTcpMss(c, interfaceName)` | MSS clamp, both directions, idempotent |
 | `removeTcpMssClamp(c, interfaceName)` | undo it |
 | `mangleRules(c)` → `list of MangleRule` | read everything back |
+| `moveMangleRule(c, id, beforeId)` | reorder; `""` sends it to the bottom |
+| `moveMangleRuleByComment(c, comment, beforeComment)` | the same, by comment handles |
 
 All setup helpers are idempotent, keyed by their comment convention
 (`"mark: <name> (...)"`, `"route mark: ..."`, `"mss clamp: ..."`) -

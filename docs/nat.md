@@ -26,6 +26,8 @@ NAT rewrites addresses as packets pass the router. Two chains:
 | `removeNatRuleByComment(c, comment)` | delete by comment |
 | `enableNatRuleByComment(c, comment)` | re-open |
 | `disableNatRuleByComment(c, comment)` | temporarily close (rule kept) |
+| `moveNatRule(c, id, beforeId)` | reorder; `""` sends it to the bottom |
+| `moveNatRuleByComment(c, comment, beforeComment)` | the same, by comment handles |
 
 `addMasquerade` is **idempotent**: if a masquerade rule for that
 interface already exists, its id is returned and nothing is duplicated
