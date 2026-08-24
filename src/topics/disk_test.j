@@ -33,3 +33,49 @@ func testDiskFromSparseRow() {
     testing.assertEqual($d.sizeBytes, 0);
     testing.assertEqual($d.freeBytes, 0);
 }
+
+func testDiskFromRowNameFallsBackToSlot() {
+    # RouterOS 7.21.5 leaves "name" empty on plain USB storage.
+    def row as map of string to string init {
+        ".id": "*1",
+        "type": "hardware",
+        "fs": "-",
+        "size": "31037849600",
+        "slot": "usb1"
+    };
+    def d as Disk init diskFromRow($row);
+    testing.assertEqual($d.name, "usb1");
+    testing.assertEqual($d.slot, "usb1");
+}
+
+func testDiskRowMatchingPrefersName() {
+    def rows as list of map of string to string init [
+        {".id": "*1", "name": "usb1", "slot": "usb2"},
+        {".id": "*2", "name": "other", "slot": "usb1"}
+    ];
+    def row as map of string to string init diskRowMatching($rows, "usb1");
+    testing.assertEqual(rowValue($row, ".id"), "*1");
+}
+
+func testDiskRowMatchingFallsBackToSlot() {
+    def rows as list of map of string to string init [
+        {".id": "*1", "slot": "usb1"},
+        {".id": "*2", "slot": "usb1-part1"}
+    ];
+    testing.assertEqual(rowValue(diskRowMatching($rows, "usb1-part1"), ".id"), "*2");
+}
+
+func testDiskRowMatchingMissIsEmpty() {
+    def rows as list of map of string to string init [{".id": "*1", "slot": "usb1"}];
+    testing.assertEqual(len(diskRowMatching($rows, "nvme1")), 0);
+}
+
+func testIsUnknownCommandRecognisesTheTrap() {
+    testing.assertTrue(isUnknownCommand("mikrotik", "!trap: no such command"));
+    testing.assertTrue(isUnknownCommand("mikrotik", "No such command or directory"));
+}
+
+func testIsUnknownCommandKeepsRealFailures() {
+    testing.assertFalse(isUnknownCommand("mikrotik", "!trap: device is busy"));
+    testing.assertFalse(isUnknownCommand("routeros", "no such command"));
+}

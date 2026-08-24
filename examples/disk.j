@@ -29,7 +29,9 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def ds as list of mt.Disk init mt.disks($c);
 if (len($ds) == 0) { io.printf("no attached storage\n"); }
 for (def d in $ds) {
-    io.printf("disk %s (%s) fs=%s size=%d free=%d\n", $d.name, $d.model, $d.fs, $d.sizeBytes, $d.freeBytes);
+    # name falls back to slot - RouterOS leaves "name" empty on USB storage
+    io.printf("disk %s (slot %s, %s) fs=%s size=%d free=%d\n",
+        $d.name, $d.slot, $d.model, $d.fs, $d.sizeBytes, $d.freeBytes);
 }
 
 # DESTRUCTIVE - erases the whole disk (not run in the demo):

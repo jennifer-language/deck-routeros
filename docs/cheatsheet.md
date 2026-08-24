@@ -759,7 +759,10 @@ downloads live): `disks(c)` → `list of Disk` (`sizeBytes`/`freeBytes`
 as ints; empty on routers with no storage), `diskByName(c, name)`,
 `ejectDisk(c, name)`, and **`formatDisk(c, name, filesystem, label)`**
 (ext4/fat32/exfat/btrfs/vfat) — **destructive and irreversible, erases
-the whole disk**; double-check the name.
+the whole disk**; double-check the name. RouterOS 7 leaves a USB stick's
+`name` empty and carries the familiar label (`usb1`, `usb1-part1`) in
+`slot`, so `Disk.name` falls back to `slot` and every lookup here takes
+either — the generic `findByName` does not.
 
 **Cloud DDNS** — a stable name for a dynamic WAN:
 `enableCloudDns(c)` registers `<serial>.sn.mynetname.net` and forces an
@@ -786,7 +789,14 @@ like `"login,ppp,hotspot"`; secret write-only; idempotent),
 **Containers (v7)** — `containers(c)` → `list of Container`,
 `addContainer(c, name, remoteImage, interfaceName, rootDir)` → id (a
 veth and container support are prerequisites — see the guide),
-`startContainer` / `stopContainer` / `removeContainer(c, name)`.
+`startContainer` / `stopContainer` / `removeContainer(c, name)`. Config
+rides on named lists: `addContainerEnv(c, listName, key, value)` and
+`addContainerMount(c, listName, src, dst)` → id, attached with
+`setContainerEnvLists` / `setContainerMountLists(c, name, listNames)`
+*before* the first start; `containerEnvs(c)` / `containerMounts(c)` list
+them, `removeContainerEnvList` / `removeContainerMountList(c, listName)`
+→ count clear one for an idempotent re-run. `Container.name` is the
+comment you gave it — the router's own `name` is the image tag.
 
 **CAPsMAN** — central management of many APs, both generations:
 `capsmanStatus(c)` → `CapsmanStatus` (`version` 1 legacy / 2 wifiwave2 /
@@ -943,7 +953,8 @@ actions `ACTION_ACCEPT` / `ACTION_DROP` / `ACTION_REJECT`, NAT chains
 `CAPSMAN_PATH` / `CAPSMAN_REGISTRATION_PATH` / `CAPSMAN_REMOTE_PATH` /
 `WIFI_CAPSMAN_PATH` / `WIFI_CAP_PATH` /
 `CLOUD_PATH` / `SNMP_PATH` / `SNMP_COMMUNITY_PATH` / `RADIUS_PATH` /
-`SYSTEM_HEALTH_PATH` / `CONTAINER_PATH` /
+`SYSTEM_HEALTH_PATH` / `CONTAINER_PATH` / `CONTAINER_ENVS_PATH` /
+`CONTAINER_MOUNTS_PATH` / `CONTAINER_CONFIG_PATH` /
 `LOG_PATH` /
 `LOGGING_PATH` / `LOGGING_ACTION_PATH` for use with the generic verbs.
 Value constants: e-mail transport `EMAIL_TLS_NONE` / `EMAIL_TLS_STARTTLS` /

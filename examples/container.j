@@ -28,9 +28,23 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def cts as list of mt.Container init mt.containers($c);
 if (len($cts) == 0) { io.printf("no containers (or the feature is not enabled)\n"); }
-for (def ct in $cts) { io.printf("container %s (%s): %s\n", $ct.name, $ct.tag, $ct.status); }
+for (def ct in $cts) {
+    io.printf("container %s (%s): %s envs=%s mounts=%s\n",
+        $ct.name, $ct.tag, $ct.status, $ct.envLists, $ct.mountLists);
+}
 
+def envs as list of mt.ContainerEnv init mt.containerEnvs($c);
+for (def e in $envs) { io.printf("env %s: %s=%s\n", $e.listName, $e.key, $e.value); }
+
+def mounts as list of mt.ContainerMount init mt.containerMounts($c);
+for (def m in $mounts) { io.printf("mount %s: %s -> %s\n", $m.listName, $m.src, $m.dst); }
+
+# create the config lists first, attach them, then start:
+#   mt.addContainerEnv($c, "pihole-env", "TZ", "Europe/Vienna");
+#   mt.addContainerMount($c, "pihole-etc", "usb1/pihole/etc", "/etc/pihole");
 #   mt.addContainer($c, "pihole", "pihole/pihole:latest", "veth1", "usb1/pihole");
+#   mt.setContainerEnvLists($c, "pihole", ["pihole-env"]);
+#   mt.setContainerMountLists($c, "pihole", ["pihole-etc"]);
 #   mt.startContainer($c, "pihole");
 
 mt.disconnect($c);

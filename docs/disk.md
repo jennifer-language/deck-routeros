@@ -22,6 +22,12 @@ mt.Disk { id, name, model, kind, fs, sizeBytes, freeBytes, slot }
 `sizeBytes`/`freeBytes` are ints (bytes); `fs` is `""` on an
 unformatted disk.
 
+`name` is what the lookups take. RouterOS 7 leaves its own `name`
+property **empty** on plain USB storage and puts the label everything
+else calls the disk — `usb1`, `usb1-part1` — in `slot` instead, so `name`
+falls back to `slot`, and `diskByName` / `formatDisk` / `ejectDisk` match
+either. Whatever `disks(c)` prints will find the disk again.
+
 ## Functions
 
 | Function | Purpose |
@@ -49,6 +55,9 @@ Prepare a fresh disk for containers (ext4 is the router-native choice):
 mt.formatDisk($c, "usb1", "ext4", "container-storage");
 ```
 
+The device (`usb1`) and its partition (`usb1-part1`) are separate
+entries; a container root-dir lives on the partition.
+
 Then eject before unplugging:
 
 ```jennifer
@@ -68,6 +77,16 @@ mt.ejectDisk($c, "usb1");
 - **Flash wear:** cheap USB sticks die under the constant small writes
   of disk logging or a busy container — use decent media, or NVMe where
   the board supports it.
+- **`name` vs. `slot`.** If a lookup ever surprises you, print the raw
+  rows: on RouterOS 7.21.5 a USB stick reports `name=` (empty) and
+  `slot=usb1`. This topic papers over that in both directions, but the
+  generic verbs (`mt.findByName($c, "/disk", "usb1")`) filter on `name`
+  server-side and will find nothing.
+- **The format command was renamed.** RouterOS ≤ 7.20 took
+  `/disk/format-drive`; 7.21 takes `/disk/format` and answers the old
+  spelling with `!trap: no such command`. `formatDisk` tries the current
+  name and falls back to the old one, so it works on both — a direct
+  `raw.run` does not.
 - **Ejecting a disk in use** (a running container's root-dir, active
   disk logging) can fail or corrupt — stop the user first.
 
