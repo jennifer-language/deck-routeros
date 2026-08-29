@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * files example - files and configuration backups.
@@ -27,7 +28,9 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def storage as list of mt.RouterFile init mt.files($c);
-for (def f in $storage) { io.printf("file %s (%s) %d bytes\n", $f.name, $f.kind, $f.size); }
+for (def f in $storage) {
+    io.printf("file %s (%s) %d bytes\n", $f.name, $f.kind, $f.size);
+}
 
 #   mt.saveBackupWith($c, "before-changes", "a strong password");
 #   mt.writeFileText($c, "note.txt", "hello");

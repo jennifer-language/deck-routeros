@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - DHCP server, leases, and the WAN-side DHCP client.
 # Spliced into routeros.j via include - not a standalone module.
@@ -149,7 +150,15 @@ export func dhcpServers(c as Client) {
  *   mt.setupDhcp($c, "dhcplan", "brlan", "192.168.77.0/24",
  *       "192.168.77.1", "192.168.77.10", "192.168.77.199", "192.168.77.1");
  */
-export func setupDhcp(c as Client, name as string, interfaceName as string, network as string, gateway as string, rangeFrom as string, rangeTo as string, dns as string) {
+export func setupDhcp(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    network as string,
+    gateway as string,
+    rangeFrom as string,
+    rangeTo as string,
+    dns as string) {
     ensureName($name, "DHCP server");
     ensureCidr($network);
     ensureIpAddress($gateway);
@@ -161,7 +170,9 @@ export func setupDhcp(c as Client, name as string, interfaceName as string, netw
     ensureInNetwork($network, $rangeTo, "range end");
     requiredId($c, INTERFACE_PATH, $interfaceName, "interface");
     add($c, IP_POOL_PATH, {"name": $name, "ranges": $rangeFrom + "-" + $rangeTo});
-    def serverId as string init add($c, DHCP_SERVER_PATH,
+    def serverId as string init add(
+        $c,
+        DHCP_SERVER_PATH,
         {"name": $name, "interface": $interfaceName, "address-pool": $name});
     add($c, DHCP_NETWORK_PATH, {"address": $network, "gateway": $gateway, "dns-server": $servers});
     return $serverId;
@@ -198,7 +209,8 @@ export func teardownDhcp(c as Client, name as string, network as string) {
         $found = $found + 1;
     }
     if ($found == 0) {
-        raiseError("no DHCP setup named \"" + $name + "\" for network \"" + $network + "\" was found");
+        raiseError("no DHCP setup named \"" + $name + "\" for network \"" + $network +
+            "\" was found");
     }
 }
 
@@ -234,8 +246,10 @@ export func dhcpLeases(c as Client) {
 export func addStaticLease(c as Client, address as string, mac as string, comment as string) {
     ensureIpAddress($address);
     ensureMac($mac);
-    def attrs as map of string to string init
-        {"address": $address, "mac-address": strings.upper($mac)};
+    def attrs as map of string to string init {
+        "address": $address,
+        "mac-address": strings.upper($mac)
+    };
     if ($comment != "") {
         $attrs["comment"] = $comment;
     }
@@ -252,7 +266,10 @@ export func addStaticLease(c as Client, address as string, mac as string, commen
 export func removeLeaseByMac(c as Client, mac as string) {
     ensureMac($mac);
     def rows as list of map of string to string init getAll($c, DHCP_LEASE_PATH);
-    def row as map of string to string init findRowByField($rows, "mac-address", strings.upper($mac));
+    def row as map of string to string init findRowByField(
+        $rows,
+        "mac-address",
+        strings.upper($mac));
     if (len($row) == 0) {
         raiseError("no DHCP lease for MAC \"" + $mac + "\" was found");
     }
@@ -309,18 +326,25 @@ export func setupWan(c as Client, interfaceName as string) {
  * @return {string} the RouterOS id of the (new or existing) DHCP client
  * @throws {Error} kind "routeros" when the interface does not exist
  */
-export func setupWanWith(c as Client, interfaceName as string, usePeerDns as bool, addDefaultRoute as bool) {
+export func setupWanWith(
+    c as Client,
+    interfaceName as string,
+    usePeerDns as bool,
+    addDefaultRoute as bool) {
     requiredId($c, INTERFACE_PATH, $interfaceName, "interface");
     def rows as list of map of string to string init getAll($c, DHCP_CLIENT_PATH);
     def existing as map of string to string init findRowByField($rows, "interface", $interfaceName);
     if (len($existing) > 0) {
         return rowValue($existing, ".id");
     }
-    return add($c, DHCP_CLIENT_PATH, {
-        "interface": $interfaceName,
-        "use-peer-dns": boolWord($usePeerDns),
-        "add-default-route": boolWord($addDefaultRoute)
-    });
+    return add(
+        $c,
+        DHCP_CLIENT_PATH,
+        {
+            "interface": $interfaceName,
+            "use-peer-dns": boolWord($usePeerDns),
+            "add-default-route": boolWord($addDefaultRoute)
+        });
 }
 
 /**
@@ -351,8 +375,7 @@ export func wanStatus(c as Client, interfaceName as string) {
  * @throws {Error} kind "routeros" when no DHCP client runs on that interface
  */
 export func renewWan(c as Client, interfaceName as string) {
-    apiRun($c, DHCP_CLIENT_PATH + "/renew",
-        {".id": requiredDhcpClientId($c, $interfaceName)});
+    apiRun($c, DHCP_CLIENT_PATH + "/renew", {".id": requiredDhcpClientId($c, $interfaceName)});
 }
 
 /**
@@ -529,7 +552,11 @@ export func dhcpRelays(c as Client) {
  * @example
  *   mt.addDhcpRelay($c, "vlan20-relay", "vlanoffice", "10.0.0.5");
  */
-export func addDhcpRelay(c as Client, name as string, interfaceName as string, serverAddress as string) {
+export func addDhcpRelay(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    serverAddress as string) {
     ensureName($name, "DHCP relay");
     def server as string init strings.trim($serverAddress);
     ensureIpAddress($server);
@@ -538,7 +565,9 @@ export func addDhcpRelay(c as Client, name as string, interfaceName as string, s
     if ($existing != "") {
         return $existing;
     }
-    return add($c, DHCP_RELAY_PATH,
+    return add(
+        $c,
+        DHCP_RELAY_PATH,
         {"name": $name, "interface": $interfaceName, "dhcp-server": $server});
 }
 

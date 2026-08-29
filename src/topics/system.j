@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - system: packages, updates, firmware, reboot.
 # Spliced into routeros.j via include - not a standalone module.
@@ -160,8 +161,10 @@ export func packages(c as Client) {
  */
 export func checkForUpdates(c as Client) {
     def none as map of string to string init {};
-    def rows as list of map of string to string init
-        apiTalk($c, SYSTEM_UPDATE_PATH + "/check-for-updates", $none);
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        SYSTEM_UPDATE_PATH + "/check-for-updates",
+        $none);
     return updateStatusFromRow(mergeRows($rows));
 }
 
@@ -177,8 +180,10 @@ export func checkForUpdates(c as Client) {
  */
 export func downloadUpdates(c as Client) {
     def none as map of string to string init {};
-    def rows as list of map of string to string init
-        apiTalk($c, SYSTEM_UPDATE_PATH + "/download", $none);
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        SYSTEM_UPDATE_PATH + "/download",
+        $none);
     return updateStatusFromRow(mergeRows($rows));
 }
 
@@ -472,7 +477,9 @@ func deviceModeFromRow(row as map of string to string) {
  * @internal
  */
 func ensureDeviceMode(mode as string) {
-    if ($mode != DEVICE_MODE_HOME and $mode != DEVICE_MODE_ADVANCED and $mode != DEVICE_MODE_ENTERPRISE) {
-        raiseError("\"" + $mode + "\" is not a device mode - use DEVICE_MODE_HOME, DEVICE_MODE_ADVANCED, or DEVICE_MODE_ENTERPRISE");
+    if ($mode != DEVICE_MODE_HOME and $mode != DEVICE_MODE_ADVANCED and
+        $mode != DEVICE_MODE_ENTERPRISE) {
+        raiseError("\"" + $mode +
+            "\" is not a device mode - use DEVICE_MODE_HOME, DEVICE_MODE_ADVANCED, or DEVICE_MODE_ENTERPRISE");
     }
 }

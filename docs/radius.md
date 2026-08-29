@@ -11,7 +11,7 @@ RADIUS centralizes authentication: instead of local `/user` accounts,
 `/ppp/secret` VPN logins, or hotspot users scattered on each router,
 credentials live on one server (FreeRADIUS, Windows NPS, an appliance)
 and every router checks against it. You bind a RADIUS server to the
-*subsystems* that should use it — admin `login`, `ppp` (the VPN
+*subsystems* that should use it - admin `login`, `ppp` (the VPN
 servers), `hotspot`, `wireless`, and so on.
 
 ## Struct
@@ -51,15 +51,15 @@ for (def s in $servers) { io.printf("radius %s for %s\n", $s.address, $s.service
 
 ## Pitfalls
 
-- **Binding a server is not the whole story** — the subsystem must also
+- **Binding a server is not the whole story** - the subsystem must also
   be told to use RADIUS (`/user/aaa use-radius=yes`, `/ppp/aaa
   use-radius=yes`, the hotspot profile's `use-radius`). Those toggles
   stay with the generic verbs.
 - **Keep a local admin.** If RADIUS becomes unreachable and you disabled
-  local auth, you are locked out — leave a local `full` user and put
+  local auth, you are locked out - leave a local `full` user and put
   RADIUS *ahead* of it, not instead of it.
 - The shared secret crosses the wire in the RADIUS protocol's weak
-  obfuscation — put the RADIUS server on a trusted segment, or use
+  obfuscation - put the RADIUS server on a trusted segment, or use
   RadSec.
 - IKEv2 EAP ([vpn.md](vpn.md)) is a common reason to add `ppp`/`ipsec`
   RADIUS.

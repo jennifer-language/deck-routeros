@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - netwatch: the router keeps an eye on hosts for you.
 # Spliced into routeros.j via include - not a standalone module.
@@ -107,7 +108,12 @@ export func watchHostWith(c as Client, host as string, interval as string, comme
  *       ":log info \"printer is back\"",
  *       "printer");
  */
-export func watchHostScripted(c as Client, host as string, downScript as string, upScript as string, comment as string) {
+export func watchHostScripted(
+    c as Client,
+    host as string,
+    downScript as string,
+    upScript as string,
+    comment as string) {
     if (strings.trim($downScript) == "" and strings.trim($upScript) == "") {
         raiseError("give at least one of downScript / upScript - otherwise use watchHost");
     }
@@ -197,7 +203,13 @@ export func enableWatch(c as Client, host as string) {
  * @throws {Error} kind "routeros" on a bad host
  * @internal
  */
-func netwatchAdd(c as Client, host as string, interval as string, downScript as string, upScript as string, comment as string) {
+func netwatchAdd(
+    c as Client,
+    host as string,
+    interval as string,
+    downScript as string,
+    upScript as string,
+    comment as string) {
     def target as string init strings.trim($host);
     ensureHost($target);
     def rows as list of map of string to string init getAll($c, NETWATCH_PATH);

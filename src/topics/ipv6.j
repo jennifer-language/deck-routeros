@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - IPv6: the stack switch, addresses, neighbor discovery.
 # Spliced into routeros.j via include - not a standalone module.
@@ -146,8 +147,7 @@ export func setIpv6Forwarding(c as Client, enabled as bool) {
  * @param {bool}   enabled true to accept RAs
  */
 export func setIpv6AcceptRouterAdvertisements(c as Client, enabled as bool) {
-    apiRun($c, IPV6_SETTINGS_PATH + "/set",
-        {"accept-router-advertisements": boolWord($enabled)});
+    apiRun($c, IPV6_SETTINGS_PATH + "/set", {"accept-router-advertisements": boolWord($enabled)});
 }
 
 /**
@@ -228,15 +228,23 @@ export func addIpv6Address(c as Client, cidr as string, interfaceName as string)
  * @example
  *   mt.addIpv6AddressWith($c, "2001:db8:1::/64", "brlan", true, true);
  */
-export func addIpv6AddressWith(c as Client, cidr as string, interfaceName as string, advertise as bool, eui64 as bool) {
+export func addIpv6AddressWith(
+    c as Client,
+    cidr as string,
+    interfaceName as string,
+    advertise as bool,
+    eui64 as bool) {
     ensureIpv6Cidr($cidr);
     ensureName($interfaceName, "interface");
-    return add($c, IPV6_ADDRESS_PATH, {
-        "address": strings.trim($cidr),
-        "interface": strings.trim($interfaceName),
-        "advertise": boolWord($advertise),
-        "eui-64": boolWord($eui64)
-    });
+    return add(
+        $c,
+        IPV6_ADDRESS_PATH,
+        {
+            "address": strings.trim($cidr),
+            "interface": strings.trim($interfaceName),
+            "advertise": boolWord($advertise),
+            "eui-64": boolWord($eui64)
+        });
 }
 
 /**
@@ -262,7 +270,8 @@ export func removeIpv6Address(c as Client, cidr as string) {
         raiseError("the IPv6 address " + $target + " is not configured on this router");
     }
     if (rowBool($row, "dynamic")) {
-        raiseError("the IPv6 address " + $target + " is dynamic - remove what creates it, not the address");
+        raiseError("the IPv6 address " + $target +
+            " is dynamic - remove what creates it, not the address");
     }
     remove($c, IPV6_ADDRESS_PATH, rowValue($row, ".id"));
 }
@@ -332,11 +341,18 @@ export func stopAdvertisingIpv6On(c as Client, interfaceName as string) {
  * @example
  *   mt.setIpv6NdFlags($c, "brlan", false, true);   # SLAAC + DHCPv6 for DNS
  */
-export func setIpv6NdFlags(c as Client, interfaceName as string, managed as bool, otherConfig as bool) {
-    return setIpv6NdEntry($c, $interfaceName, {
-        "managed-address-configuration": boolWord($managed),
-        "other-configuration": boolWord($otherConfig)
-    });
+export func setIpv6NdFlags(
+    c as Client,
+    interfaceName as string,
+    managed as bool,
+    otherConfig as bool) {
+    return setIpv6NdEntry(
+        $c,
+        $interfaceName,
+        {
+            "managed-address-configuration": boolWord($managed),
+            "other-configuration": boolWord($otherConfig)
+        });
 }
 
 /**

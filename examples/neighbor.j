@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * neighbor example - discovered neighbors (LLDP/CDP/MNDP).
@@ -27,10 +28,18 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def ns as list of mt.Neighbor init mt.neighbors($c);
-if (len($ns) == 0) { io.printf("no neighbors discovered\n"); }
+if (len($ns) == 0) {
+    io.printf("no neighbors discovered\n");
+}
 for (def n in $ns) {
-    io.printf("%s: %s (%s %s) at %s on %s\n",
-        $n.identity, $n.platform, $n.board, $n.version, $n.address, $n.interfaceName);
+    io.printf(
+        "%s: %s (%s %s) at %s on %s\n",
+        $n.identity,
+        $n.platform,
+        $n.board,
+        $n.version,
+        $n.address,
+        $n.interfaceName);
 }
 
 mt.disconnect($c);

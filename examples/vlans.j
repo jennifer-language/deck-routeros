@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * vlans example - 802.1Q tagged interfaces.
@@ -27,9 +28,16 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def vs as list of mt.Vlan init mt.vlans($c);
-if (len($vs) == 0) { io.printf("no VLAN interfaces\n"); }
+if (len($vs) == 0) {
+    io.printf("no VLAN interfaces\n");
+}
 for (def v in $vs) {
-    io.printf("vlan %s: tag %d on %s running=%t\n", $v.name, $v.vlanId, $v.interfaceName, $v.running);
+    io.printf(
+        "vlan %s: tag %d on %s running=%t\n",
+        $v.name,
+        $v.vlanId,
+        $v.interfaceName,
+        $v.running);
 }
 
 #   mt.addVlan($c, "vlanoffice", 20, "ether2");
@@ -38,7 +46,12 @@ for (def v in $vs) {
 # the modern (VLAN-aware bridge) model - bridge VLAN table
 def bvs as list of mt.BridgeVlan init mt.bridgeVlans($c);
 for (def bv in $bvs) {
-    io.printf("bridge %s vlan %s tagged=%s untagged=%s\n", $bv.bridge, $bv.vlanIds, $bv.tagged, $bv.untagged);
+    io.printf(
+        "bridge %s vlan %s tagged=%s untagged=%s\n",
+        $bv.bridge,
+        $bv.vlanIds,
+        $bv.tagged,
+        $bv.untagged);
 }
 
 # Build a VLAN-aware bridge (table + pvids FIRST, filtering LAST):

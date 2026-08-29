@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - CAPsMAN: central management of many access points.
 # Spliced into routeros.j via include - not a standalone module.
@@ -170,7 +171,9 @@ func tryGetAll(c as Client, path as string) {
     def rows as list of map of string to string init [];
     try {
         $rows = getAll($c, $path);
-    } catch (e) {
+    } catch (e) { # lint-disable: L103
+        # Deliberate: a CAPsMAN path is absent on a router with no CAPsMAN
+        # package, and the documented result for that is an empty list.
     }
     return $rows;
 }

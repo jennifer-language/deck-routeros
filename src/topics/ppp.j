@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - PPPoE client, and the PPP user database shared by the
 # L2TP / SSTP / OpenVPN / PPTP remote-access servers.
@@ -112,7 +113,12 @@ export func vpnUsers(c as Client) {
  *   mt.enableL2tpServer($c, "a long ipsec secret");
  *   mt.addVpnUser($c, "alice", "her password", "any", "field laptop");
  */
-export func addVpnUser(c as Client, name as string, password as string, service as string, comment as string) {
+export func addVpnUser(
+    c as Client,
+    name as string,
+    password as string,
+    service as string,
+    comment as string) {
     ensureName($name, "VPN user");
     if (strings.trim($password) == "") {
         raiseError("the VPN user password must not be empty");
@@ -121,7 +127,11 @@ export func addVpnUser(c as Client, name as string, password as string, service 
     if (idByName($c, PPP_SECRET_PATH, $name) != "") {
         raiseError("the VPN user \"" + $name + "\" already exists");
     }
-    def attrs as map of string to string init {"name": $name, "password": $password, "service": $service};
+    def attrs as map of string to string init {
+        "name": $name,
+        "password": $password,
+        "service": $service
+    };
     if ($comment != "") {
         $attrs["comment"] = $comment;
     }
@@ -216,7 +226,8 @@ export func kickPppUser(c as Client, name as string) {
  */
 func ensurePppService(service as string) {
     if (not lists.contains(PPP_SERVICES, $service)) {
-        raiseError("unknown VPN service \"" + $service + "\" - use one of: " + strings.join(PPP_SERVICES, ", "));
+        raiseError("unknown VPN service \"" + $service + "\" - use one of: " +
+            strings.join(PPP_SERVICES, ", "));
     }
 }
 
@@ -236,7 +247,15 @@ func ensurePppService(service as string) {
  * @throws {Error} kind "routeros" on bad input
  * @internal
  */
-func vpnClientAdd(c as Client, path as string, kind as string, name as string, serverAddress as string, user as string, password as string, extra as map of string to string) {
+func vpnClientAdd(
+    c as Client,
+    path as string,
+    kind as string,
+    name as string,
+    serverAddress as string,
+    user as string,
+    password as string,
+    extra as map of string to string) {
     ensureName($name, $kind + " client");
     ensureName($user, $kind + " user");
     if (strings.trim($password) == "") {
@@ -248,8 +267,12 @@ func vpnClientAdd(c as Client, path as string, kind as string, name as string, s
     if ($existing != "") {
         return $existing;
     }
-    def attrs as map of string to string init
-        {"name": $name, "connect-to": $server, "user": $user, "password": $password};
+    def attrs as map of string to string init {
+        "name": $name,
+        "connect-to": $server,
+        "user": $user,
+        "password": $password
+    };
     def keys as list of string init maps.keys($extra);
     for (def k in $keys) {
         $attrs[$k] = $extra[$k];
@@ -396,7 +419,12 @@ export func pppoeClients(c as Client) {
  *   mt.setupPppoe($c, "pppoewan", "ether1", "user@provider.example", "secret");
  *   mt.addMasquerade($c, "pppoewan", "lan to internet");
  */
-export func setupPppoe(c as Client, name as string, interfaceName as string, user as string, password as string) {
+export func setupPppoe(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    user as string,
+    password as string) {
     ensureName($name, "PPPoE client");
     ensureName($user, "PPPoE user");
     if (strings.trim($password) == "") {
@@ -407,15 +435,18 @@ export func setupPppoe(c as Client, name as string, interfaceName as string, use
     if ($existing != "") {
         return $existing;
     }
-    return add($c, PPPOE_CLIENT_PATH, {
-        "name": $name,
-        "interface": $interfaceName,
-        "user": $user,
-        "password": $password,
-        "add-default-route": "yes",
-        "use-peer-dns": "yes",
-        "disabled": "no"
-    });
+    return add(
+        $c,
+        PPPOE_CLIENT_PATH,
+        {
+            "name": $name,
+            "interface": $interfaceName,
+            "user": $user,
+            "password": $password,
+            "add-default-route": "yes",
+            "use-peer-dns": "yes",
+            "disabled": "no"
+        });
 }
 
 /**
@@ -453,7 +484,10 @@ export func setPppoeCredentials(c as Client, name as string, user as string, pas
     if (strings.trim($password) == "") {
         raiseError("the PPPoE password must not be empty - it comes from your ISP");
     }
-    set($c, PPPOE_CLIENT_PATH, requiredId($c, PPPOE_CLIENT_PATH, $name, "PPPoE client"),
+    set(
+        $c,
+        PPPOE_CLIENT_PATH,
+        requiredId($c, PPPOE_CLIENT_PATH, $name, "PPPoE client"),
         {"user": $user, "password": $password});
 }
 
@@ -567,11 +601,14 @@ export func addPppoeServer(c as Client, serviceName as string, interfaceName as 
     requiredId($c, INTERFACE_PATH, $interfaceName, "interface");
     def rows as list of map of string to string init getAll($c, PPPOE_SERVER_PATH);
     for (def row in $rows) {
-        if (rowValue($row, "service-name") == $serviceName and rowValue($row, "interface") == $interfaceName) {
+        if (rowValue($row, "service-name") == $serviceName and
+            rowValue($row, "interface") == $interfaceName) {
             return rowValue($row, ".id");
         }
     }
-    return add($c, PPPOE_SERVER_PATH,
+    return add(
+        $c,
+        PPPOE_SERVER_PATH,
         {"service-name": $serviceName, "interface": $interfaceName, "one-session-per-host": "yes"});
 }
 

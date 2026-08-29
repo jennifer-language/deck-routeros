@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * log example - reading the router log.
@@ -27,7 +28,9 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def tail as list of mt.LogEntry init mt.recentLogEntries($c, 10);
-for (def e in $tail) { io.printf("%s [%s] %s\n", $e.time, $e.topics, $e.message); }
+for (def e in $tail) {
+    io.printf("%s [%s] %s\n", $e.time, $e.topics, $e.message);
+}
 def problems as list of mt.LogEntry init mt.logErrors($c);
 io.printf("%d error/critical entries in the log buffer\n", len($problems));
 

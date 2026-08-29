@@ -78,7 +78,7 @@ io.printf("rx %s bps / tx %s bps, lost %d\n",
 Beyond ping and bandwidth-test, the tools topic covers three more
 router-side diagnostics:
 
-**Traceroute** — the path to a host, hop by hop, and where it breaks:
+**Traceroute** - the path to a host, hop by hop, and where it breaks:
 
 ```jennifer
 def hops as list of mt.TracerouteHop init mt.traceroute($c, "1.1.1.1");
@@ -87,7 +87,7 @@ for (def h in $hops) {
 }
 ```
 
-**Fetch** — the router makes an HTTP(S) request from *its* vantage
+**Fetch** - the router makes an HTTP(S) request from *its* vantage
 point: call a webhook, hit a REST API, or check its own public IP.
 
 ```jennifer
@@ -96,7 +96,7 @@ if ($ip.ok) { io.printf("public IP: %s\n", $ip.data); }
 mt.downloadFile($c, "https://example.org/config.rsc", "config.rsc");   # to storage
 ```
 
-**E-mail** — configure SMTP once, then the router (or its scripts) can
+**E-mail** - configure SMTP once, then the router (or its scripts) can
 alert. Almost every real relay wants TLS, so reach for
 `configureEmailWith` and its `EMAIL_TLS_*` mode; the server may be a DNS
 name or an IP:
@@ -121,7 +121,7 @@ if ($e.tls == mt.EMAIL_TLS_NONE) { io.printf("alerts leave in the clear\n"); }
 RouterOS 7.12 renamed these properties (`address` → `server`,
 `start-tls` → `tls`). Both calls read the router's own settings row
 first and write whichever spelling it uses, so one call works across
-versions — on a pre-7.12 router `EMAIL_TLS_STARTTLS` becomes
+versions - on a pre-7.12 router `EMAIL_TLS_STARTTLS` becomes
 `start-tls=yes` and `EMAIL_TLS_IMPLICIT` becomes `start-tls=tls-only`.
 
 Pair `sendEmail` with [scheduler.md](scheduler.md) (a nightly report) or

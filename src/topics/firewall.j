@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - firewall filter rules.
 # Spliced into routeros.j via include - not a standalone module.
@@ -29,13 +30,31 @@ export def const ACTION_REJECT as string init "reject";
 export def const ACTION_NOTRACK as string init "notrack";
 
 def const KNOWN_ACTIONS as list of string init [
-    "accept", "drop", "reject", "log", "jump", "return",
-    "passthrough", "tarpit", "fasttrack-connection", "notrack"
+    "accept",
+    "drop",
+    "reject",
+    "log",
+    "jump",
+    "return",
+    "passthrough",
+    "tarpit",
+    "fasttrack-connection",
+    "notrack"
 ];
 
 def const KNOWN_PROTOCOLS as list of string init [
-    "tcp", "udp", "icmp", "gre", "ipip", "ospf", "igmp",
-    "ipsec-esp", "ipsec-ah", "l2tp", "sctp", "vrrp"
+    "tcp",
+    "udp",
+    "icmp",
+    "gre",
+    "ipip",
+    "ospf",
+    "igmp",
+    "ipsec-esp",
+    "ipsec-ah",
+    "l2tp",
+    "sctp",
+    "vrrp"
 ];
 
 /**
@@ -484,7 +503,8 @@ func firewallIdByComment(c as Client, comment as string) {
  */
 func ensureAction(action as string) {
     if (not lists.contains(KNOWN_ACTIONS, $action)) {
-        raiseError("unknown firewall action \"" + $action + "\" - use one of: " + strings.join(KNOWN_ACTIONS, ", "));
+        raiseError("unknown firewall action \"" + $action + "\" - use one of: " +
+            strings.join(KNOWN_ACTIONS, ", "));
     }
 }
 
@@ -497,7 +517,8 @@ func ensureAction(action as string) {
  */
 func ensureProtocol(protocol as string) {
     if (not lists.contains(KNOWN_PROTOCOLS, $protocol)) {
-        raiseError("unknown protocol \"" + $protocol + "\" - use one of: " + strings.join(KNOWN_PROTOCOLS, ", "));
+        raiseError("unknown protocol \"" + $protocol + "\" - use one of: " +
+            strings.join(KNOWN_PROTOCOLS, ", "));
     }
 }
 
@@ -518,7 +539,11 @@ func ensureInputAccept(c as Client, comment as string, matchAttrs as map of stri
     if (len($existing) > 0) {
         return;
     }
-    def attrs as map of string to string init {"chain": CHAIN_INPUT, "action": ACTION_ACCEPT, "comment": $comment};
+    def attrs as map of string to string init {
+        "chain": CHAIN_INPUT,
+        "action": ACTION_ACCEPT,
+        "comment": $comment
+    };
     def keys as list of string init maps.keys($matchAttrs);
     for (def k in $keys) {
         $attrs[$k] = $matchAttrs[$k];

@@ -16,7 +16,7 @@ those, typed and validated.
 ## Connecting
 
 ```jennifer
-import "./routeros.j" as mt;
+import "@jennifer/routeros/" as mt;
 
 # plaintext API, port 8728
 def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
@@ -107,11 +107,11 @@ mt> /ip/address/print
 mt< 3 rows
 ```
 
-**`setVerbose` returns a copy — keep it.** A Jennifer module holds no
+**`setVerbose` returns a copy - keep it.** A Jennifer module holds no
 mutable state (`mutable def is not allowed at a module's top level`), so
 there is no global switch to flip; the flag rides on the `Client` like
 every other value in the deck. `mt.setVerbose($c, true);` on its own
-does nothing — you must write `$c = mt.setVerbose($c, true);`.
+does nothing - you must write `$c = mt.setVerbose($c, true);`.
 
 Set the environment variable `MT_VERBOSE` to `1` / `yes` / `true` / `on`
 and `connect` seeds the flag for you, which traces an existing script
@@ -123,7 +123,7 @@ MT_VERBOSE=1 jennifer run provision.j
 
 **Credentials are never printed.** Verbose mode shows what goes on the
 wire, and that includes SMTP passwords, WPA keys, IPsec and PPP secrets,
-and WireGuard private keys — so those values are replaced:
+and WireGuard private keys - so those values are replaced:
 
 ```
 mt> /tool/e-mail/set server=smtp.example.org user=router password=<redacted>
@@ -133,20 +133,20 @@ The redaction is deliberately narrow, matching `password`, `secret`,
 `passphrase`, `*-password`, `*-secret`, `*-passphrase`, `private-key`,
 and anything containing `pre-shared-key`. `public-key` is public,
 `key-usage` is a certificate flag, and `passive` / `passthrough` merely
-start with the same letters — none of those are hidden. One thing it
+start with the same letters - none of those are hidden. One thing it
 cannot redact: an SNMP community is sent as an ordinary `name`, so it
 will appear in the log ([snmp.md](snmp.md) notes that a community
 string acts like a password).
 
 Logging covers **every** command the module sends, not just the generic
-verbs — the topic files never call the transport directly, they all
+verbs - the topic files never call the transport directly, they all
 funnel through the same internal chokepoint.
 
 ## Errors
 
-- `Error{kind: "routeros"}` — routeros's own validation refused your
+- `Error{kind: "routeros"}` - routeros's own validation refused your
   input *before* anything was sent; the message says what and why.
-- `Error{kind: "mikrotik"}` — the router itself refused (`!trap`), or
+- `Error{kind: "mikrotik"}` - the router itself refused (`!trap`), or
   the connection failed.
 
 ```jennifer

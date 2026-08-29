@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - connection tracking: the live connection table.
 # Spliced into routeros.j via include - not a standalone module.
@@ -90,8 +91,8 @@ export func connectionsFor(c as Client, address as string) {
     def rows as list of map of string to string init getAll($c, CONNECTION_PATH);
     def out as list of Connection init [];
     for (def row in $rows) {
-        if (strings.contains(rowValue($row, "src-address"), $address)
-                or strings.contains(rowValue($row, "dst-address"), $address)) {
+        if (strings.contains(rowValue($row, "src-address"), $address) or
+            strings.contains(rowValue($row, "dst-address"), $address)) {
             $out[] = connectionFromRow($row);
         }
     }
@@ -114,8 +115,8 @@ export func dropConnectionsFor(c as Client, address as string) {
     def rows as list of map of string to string init getAll($c, CONNECTION_PATH);
     def dropped as int init 0;
     for (def row in $rows) {
-        if (strings.contains(rowValue($row, "src-address"), $address)
-                or strings.contains(rowValue($row, "dst-address"), $address)) {
+        if (strings.contains(rowValue($row, "src-address"), $address) or
+            strings.contains(rowValue($row, "dst-address"), $address)) {
             remove($c, CONNECTION_PATH, rowValue($row, ".id"));
             $dropped = $dropped + 1;
         }

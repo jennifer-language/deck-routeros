@@ -15,7 +15,7 @@ is what broke**. An e-mail alert about a dead WAN never arrives; a text
 over the modem does. Pair it with [netwatch.md](netwatch.md) or the
 [scheduler.md](scheduler.md) and the router tells you itself.
 
-Reception is **off by default** — a router with a SIM keeps nothing that
+Reception is **off by default** - a router with a SIM keeps nothing that
 arrives until you turn it on, and you must name the modem port it
 receives on.
 
@@ -68,7 +68,7 @@ io.printf("cleared %d\n", mt.clearSmsInbox($c));
 ## Pitfalls
 
 - **Reception is off until you enable it**, and enabling needs the modem
-  port — `lteInterfaces(c)` from [lte.md](lte.md) lists them (usually
+  port - `lteInterfaces(c)` from [lte.md](lte.md) lists them (usually
   `lte1`).
 - **Set `allowedNumber`** if the SIM number is at all guessable.
   Unrestricted, remote SMS commands are an unauthenticated path onto the
@@ -76,8 +76,8 @@ io.printf("cleared %d\n", mt.clearSmsInbox($c));
 - **The inbox fills up.** `keepMaxSms` caps it; nothing prunes on its
   own unless the router's `autoErase` is on, so a long-running box wants
   `clearSmsInbox` on a schedule.
-- Phone numbers are validated leniently — digits plus `+ - ( )` and
-  spaces — because national formats vary. It catches a name passed where
+- Phone numbers are validated leniently - digits plus `+ - ( )` and
+  spaces - because national formats vary. It catches a name passed where
   a number belongs, not a wrong number.
 - A modem that is registered but refusing to send is usually out of
   credit or barred for premium/roaming SMS; the failure comes back as

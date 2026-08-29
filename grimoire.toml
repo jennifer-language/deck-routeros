@@ -1,0 +1,33 @@
+# Grimoire book configuration for the @jennifer/routeros documentation.
+
+[book]
+title = "@jennifer/routeros"
+description = "A thick, friendly layer over the MikroTik RouterOS API for Jennifer."
+language = "en"
+src = "docs"
+
+[build]
+out = "site"
+clean = true
+jobs = 0
+
+[html]
+theme = "ivy"
+mode = "auto"
+navPosition = "left"
+tocPosition = "right"
+tocDepth = 3
+sectionNumbers = true
+titleUrl = "https://jennifer-language.github.io/deck-routeros/"
+repoUrl = "https://github.com/jennifer-language/deck-routeros"
+repoLabel = "Source"
+editUrl = "https://github.com/jennifer-language/deck-routeros/edit/main/docs/{path}"
+
+[highlight]
+enabled = true
+
+[search]
+enabled = true
+
+[pdf]
+enabled = false

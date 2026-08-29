@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - clock and NTP: a router that knows what time it is.
 # Spliced into routeros.j via include - not a standalone module.
@@ -66,8 +67,7 @@ export func clock(c as Client) {
 export func setTimezone(c as Client, timezone as string) {
     def tz as string init strings.trim($timezone);
     ensureName($tz, "timezone");
-    apiRun($c, CLOCK_PATH + "/set",
-        {"time-zone-name": $tz, "time-zone-autodetect": "no"});
+    apiRun($c, CLOCK_PATH + "/set", {"time-zone-name": $tz, "time-zone-autodetect": "no"});
 }
 
 /**
@@ -86,8 +86,7 @@ export func setTimezone(c as Client, timezone as string) {
  */
 export func useNtp(c as Client, servers as string) {
     def serverList as string init normalizedNtpServers($servers);
-    apiRun($c, NTP_CLIENT_PATH + "/set",
-        {"enabled": "yes", "servers": $serverList});
+    apiRun($c, NTP_CLIENT_PATH + "/set", {"enabled": "yes", "servers": $serverList});
 }
 
 /**

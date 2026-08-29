@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the clock topic.
 # Spliced into routeros_test.j via include - run with:
@@ -46,7 +47,8 @@ func testNtpFromRowNotSynced() {
 
 func testNormalizedNtpServersForms() {
     testing.assertEqual(normalizedNtpServers("pool.ntp.org"), "pool.ntp.org");
-    testing.assertEqual(normalizedNtpServers(" 0.pool.ntp.org , 1.pool.ntp.org "),
+    testing.assertEqual(
+        normalizedNtpServers(" 0.pool.ntp.org , 1.pool.ntp.org "),
         "0.pool.ntp.org,1.pool.ntp.org");
 }
 

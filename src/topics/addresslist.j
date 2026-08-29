@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - firewall address lists: named sets of addresses.
 # Spliced into routeros.j via include - not a standalone module.
@@ -78,7 +79,11 @@ export func addressListEntries(c as Client, listName as string) {
  *   mt.addToAddressList($c, "blocklist", "203.0.113.7", "ssh scanner");
  *   mt.dropAddressList($c, "blocklist", mt.CHAIN_INPUT, "drop blocklisted");
  */
-export func addToAddressList(c as Client, listName as string, address as string, comment as string) {
+export func addToAddressList(
+    c as Client,
+    listName as string,
+    address as string,
+    comment as string) {
     ensureName($listName, "address list");
     def entry as string init strings.trim($address);
     ensureListAddress($entry);
@@ -107,14 +112,22 @@ export func addToAddressList(c as Client, listName as string, address as string,
  * @return {string} the RouterOS id of the new entry
  * @throws {Error} kind "routeros" on a bad list name, address, or timeout
  */
-export func addToAddressListTimed(c as Client, listName as string, address as string, timeout as string, comment as string) {
+export func addToAddressListTimed(
+    c as Client,
+    listName as string,
+    address as string,
+    timeout as string,
+    comment as string) {
     ensureName($listName, "address list");
     def entry as string init strings.trim($address);
     ensureListAddress($entry);
     def ttl as string init strings.trim($timeout);
     ensureSchedulerInterval($ttl);
-    def attrs as map of string to string init
-        {"list": $listName, "address": $entry, "timeout": $ttl};
+    def attrs as map of string to string init {
+        "list": $listName,
+        "address": $entry,
+        "timeout": $ttl
+    };
     if ($comment != "") {
         $attrs["comment"] = $comment;
     }
@@ -131,7 +144,10 @@ export func addToAddressListTimed(c as Client, listName as string, address as st
  */
 export func removeFromAddressList(c as Client, listName as string, address as string) {
     def rows as list of map of string to string init getAll($c, ADDRESS_LIST_PATH);
-    def row as map of string to string init findAddressListRow($rows, $listName, strings.trim($address));
+    def row as map of string to string init findAddressListRow(
+        $rows,
+        $listName,
+        strings.trim($address));
     if (len($row) == 0) {
         raiseError("the list \"" + $listName + "\" has no entry \"" + $address + "\"");
     }
@@ -197,7 +213,10 @@ export func dropAddressList(c as Client, listName as string, chain as string, co
  * @return {map of string to string} the matching row, or an empty map
  * @internal
  */
-func findAddressListRow(rows as list of map of string to string, listName as string, address as string) {
+func findAddressListRow(
+    rows as list of map of string to string,
+    listName as string,
+    address as string) {
     for (def row in $rows) {
         if (rowValue($row, "list") == $listName and rowValue($row, "address") == $address) {
             return $row;

@@ -18,7 +18,7 @@ do not configure the chip directly** for the common case. You build a
 `setPortPvid`), and when the configuration is offloadable, RouterOS
 pushes it down to the switch chip automatically. The legacy per-chip
 config (`/interface/ethernet/switch/vlan`, `.../rule`) is expert,
-hardware-specific, and superseded — this topic deliberately does not
+hardware-specific, and superseded - this topic deliberately does not
 wrap it.
 
 What this topic gives you is the ability to **see and verify** offload:
@@ -62,7 +62,7 @@ def hosts as list of mt.SwitchHost init mt.switchHosts($c);
 io.printf("%d MACs learned in hardware\n", len($hosts));
 ```
 
-Force a port to software forwarding (rarely wanted — e.g. to use a
+Force a port to software forwarding (rarely wanted - e.g. to use a
 software-only feature on it):
 
 ```jennifer
@@ -77,13 +77,13 @@ mt.setBridgePortHardwareOffload($c, "ether2", false);
   triple: `hardwareOffload == true` on the ports **and** low CPU under
   load **and** a populated `switchHosts` for your LAN's MACs.
 - **A pure-CPU board** (`switchChips` empty) forwards everything in
-  software — fine at its rated throughput, but there's nothing to
+  software - fine at its rated throughput, but there's nothing to
   offload to; don't chase a chip that isn't there.
-- **Ports on different switch chips can't offload between each other** —
+- **Ports on different switch chips can't offload between each other** -
   traffic between them crosses the CPU. `switchChips` shows how many
   there are.
 - **Turning `hw` off** on a port that was accelerated moves its traffic
-  to the CPU — a quick way to pin the CPU on a busy port. Only do it
+  to the CPU - a quick way to pin the CPU on a busy port. Only do it
   deliberately.
 - The deep per-chip config (ACL-style switch rules, port mirroring, the
   legacy hardware VLAN table) is reachable with the generic verbs on

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - IPsec: standards-based site-to-site tunnels.
 # Spliced into routeros.j via include - not a standalone module.
@@ -152,7 +153,13 @@ export func ipsecActive(c as Client) {
  *   mt.setupIpsecTunnel($c, "tobranch", "203.0.113.99",
  *       "a long random shared secret", "192.168.10.0/24", "192.168.20.0/24");
  */
-export func setupIpsecTunnel(c as Client, name as string, peerAddress as string, psk as string, localSubnet as string, remoteSubnet as string) {
+export func setupIpsecTunnel(
+    c as Client,
+    name as string,
+    peerAddress as string,
+    psk as string,
+    localSubnet as string,
+    remoteSubnet as string) {
     ensureName($name, "IPsec tunnel");
     def remote as string init strings.trim($peerAddress);
     ensureHost($remote);
@@ -165,16 +172,15 @@ export func setupIpsecTunnel(c as Client, name as string, peerAddress as string,
     if ($existing != "") {
         return $existing;
     }
-    def peerId as string init add($c, IPSEC_PEER_PATH,
+    def peerId as string init add(
+        $c,
+        IPSEC_PEER_PATH,
         {"name": $name, "address": $remote, "exchange-mode": "ike2"});
-    add($c, IPSEC_IDENTITY_PATH,
-        {"peer": $name, "auth-method": "pre-shared-key", "secret": $psk});
-    add($c, IPSEC_POLICY_PATH, {
-        "peer": $name,
-        "tunnel": "yes",
-        "src-address": $localSubnet,
-        "dst-address": $remoteSubnet
-    });
+    add($c, IPSEC_IDENTITY_PATH, {"peer": $name, "auth-method": "pre-shared-key", "secret": $psk});
+    add(
+        $c,
+        IPSEC_POLICY_PATH,
+        {"peer": $name, "tunnel": "yes", "src-address": $localSubnet, "dst-address": $remoteSubnet});
     ipsecNatBypass($c, $name, $localSubnet, $remoteSubnet);
     ipsecFirewallAccepts($c, $name, $remote);
     return $peerId;
@@ -278,8 +284,11 @@ func ipsecFirewallAccepts(c as Client, name as string, remote as string) {
         def comment as string init "ipsec: " + $name + " (" + $kind + ")";
         def existing as map of string to string init findRowByField($fwRows, "comment", $comment);
         if (len($existing) == 0) {
-            def attrs as map of string to string init
-                {"chain": CHAIN_INPUT, "action": ACTION_ACCEPT, "comment": $comment};
+            def attrs as map of string to string init {
+                "chain": CHAIN_INPUT,
+                "action": ACTION_ACCEPT,
+                "comment": $comment
+            };
             if ($kind == "ike") {
                 $attrs["protocol"] = "udp";
                 $attrs["dst-port"] = "500";
@@ -380,7 +389,12 @@ func ipsecPolicyFromRow(row as map of string to string) {
  *       "10.200.0.10-10.200.0.200", "1.1.1.1");
  *   # add EAP users via RADIUS, or /ip/ipsec identity with the generic verbs
  */
-export func setupIkev2Server(c as Client, name as string, certificate as string, poolRange as string, dns as string) {
+export func setupIkev2Server(
+    c as Client,
+    name as string,
+    certificate as string,
+    poolRange as string,
+    dns as string) {
     ensureName($name, "IKEv2 server");
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
     ensureIpAddress($dns);
@@ -391,22 +405,30 @@ export func setupIkev2Server(c as Client, name as string, certificate as string,
         add($c, IP_POOL_PATH, {"name": $name, "ranges": strings.trim($poolRange)});
     }
     if (idByName($c, IPSEC_MODE_CONFIG_PATH, $name) == "") {
-        add($c, IPSEC_MODE_CONFIG_PATH,
-            {"name": $name, "address-pool": $name, "address-prefix-length": "32", "static-dns": strings.trim($dns)});
+        add(
+            $c,
+            IPSEC_MODE_CONFIG_PATH,
+            {
+                "name": $name,
+                "address-pool": $name,
+                "address-prefix-length": "32",
+                "static-dns": strings.trim($dns)
+            });
     }
-    def peerId as string init add($c, IPSEC_PEER_PATH, {
-        "name": $name,
-        "exchange-mode": "ike2",
-        "passive": "yes",
-        "send-initial-contact": "no"
-    });
-    add($c, IPSEC_IDENTITY_PATH, {
-        "peer": $name,
-        "auth-method": "eap-radius",
-        "certificate": $certificate,
-        "generate-policy": "port-strict",
-        "mode-config": $name
-    });
+    def peerId as string init add(
+        $c,
+        IPSEC_PEER_PATH,
+        {"name": $name, "exchange-mode": "ike2", "passive": "yes", "send-initial-contact": "no"});
+    add(
+        $c,
+        IPSEC_IDENTITY_PATH,
+        {
+            "peer": $name,
+            "auth-method": "eap-radius",
+            "certificate": $certificate,
+            "generate-policy": "port-strict",
+            "mode-config": $name
+        });
     ipsecFirewallAccepts($c, $name, "");
     return $peerId;
 }

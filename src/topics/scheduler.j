@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - scheduled scripts.
 # Spliced into routeros.j via include - not a standalone module.
@@ -73,11 +74,7 @@ export func scheduleScript(c as Client, name as string, interval as string, sour
     def every as string init strings.trim($interval);
     ensureSchedulerInterval($every);
     ensureScriptSource($source);
-    return add($c, SCHEDULER_PATH, {
-        "name": $name,
-        "interval": $every,
-        "on-event": $source
-    });
+    return add($c, SCHEDULER_PATH, {"name": $name, "interval": $every, "on-event": $source});
 }
 
 /**
@@ -98,12 +95,10 @@ export func scheduleDaily(c as Client, name as string, startTime as string, sour
     def at as string init strings.trim($startTime);
     ensureClockTime($at);
     ensureScriptSource($source);
-    return add($c, SCHEDULER_PATH, {
-        "name": $name,
-        "start-time": $at,
-        "interval": "1d",
-        "on-event": $source
-    });
+    return add(
+        $c,
+        SCHEDULER_PATH,
+        {"name": $name, "start-time": $at, "interval": "1d", "on-event": $source});
 }
 
 /**
@@ -118,12 +113,10 @@ export func scheduleDaily(c as Client, name as string, startTime as string, sour
 export func scheduleAtStartup(c as Client, name as string, source as string) {
     ensureName($name, "task");
     ensureScriptSource($source);
-    return add($c, SCHEDULER_PATH, {
-        "name": $name,
-        "start-time": "startup",
-        "interval": "0",
-        "on-event": $source
-    });
+    return add(
+        $c,
+        SCHEDULER_PATH,
+        {"name": $name, "start-time": "startup", "interval": "0", "on-event": $source});
 }
 
 /**
@@ -227,15 +220,18 @@ func ensureSchedulerInterval(value as string) {
             $pending = true;
         } elseif (strings.contains("smhdw", $ch)) {
             if (not $pending) {
-                raiseError("\"" + $value + "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
+                raiseError("\"" + $value +
+                    "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
             }
             $pending = false;
         } else {
-            raiseError("\"" + $value + "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
+            raiseError("\"" + $value +
+                "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
         }
     }
     if (not $sawDigit) {
-        raiseError("\"" + $value + "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
+        raiseError("\"" + $value +
+            "\" is not an interval - write it like \"10m\", \"1d\", or \"1d12h\"");
     }
 }
 

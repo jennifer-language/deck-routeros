@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * trafficflow example - NetFlow / IPFIX export to a collector.
@@ -29,7 +30,9 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def s as mt.TrafficFlowSettings init mt.trafficFlowStatus($c);
 io.printf("traffic-flow enabled=%t on %s\n", $s.enabled, $s.interfaces);
 def ts as list of mt.FlowTarget init mt.flowTargets($c);
-for (def t in $ts) { io.printf("  export v%s -> %s:%s\n", $t.version, $t.address, $t.port); }
+for (def t in $ts) {
+    io.printf("  export v%s -> %s:%s\n", $t.version, $t.address, $t.port);
+}
 
 #   mt.enableTrafficFlow($c);
 #   mt.addFlowTarget($c, "10.0.9.30", 2055, "ipfix");

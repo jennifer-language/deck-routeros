@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - disks: USB / NVMe / SATA storage on the router.
 # Spliced into routeros.j via include - not a standalone module.
@@ -115,7 +116,8 @@ export func diskByName(c as Client, name as string) {
  */
 export func formatDisk(c as Client, name as string, filesystem as string, label as string) {
     if (not lists.contains(DISK_FILESYSTEMS, $filesystem)) {
-        raiseError("unknown filesystem \"" + $filesystem + "\" - use one of: " + strings.join(DISK_FILESYSTEMS, ", "));
+        raiseError("unknown filesystem \"" + $filesystem + "\" - use one of: " +
+            strings.join(DISK_FILESYSTEMS, ", "));
     }
     def id as string init requiredDiskId($c, $name);
     def attrs as map of string to string init {".id": $id, "file-system": $filesystem};
@@ -155,7 +157,8 @@ export func ejectDisk(c as Client, name as string) {
 func requiredDiskId(c as Client, name as string) {
     def row as map of string to string init diskRowByName($c, $name);
     if (len($row) == 0) {
-        raiseError("the disk \"" + $name + "\" was not found on the router (neither its name nor its slot matched - `disks(c)` lists what is attached)");
+        raiseError("the disk \"" + $name +
+            "\" was not found on the router (neither its name nor its slot matched - `disks(c)` lists what is attached)");
     }
     return rowValue($row, ".id");
 }

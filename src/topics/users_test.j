@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the users topic.
 # Spliced into routeros_test.j via include - run with:
@@ -29,7 +30,8 @@ func testEnsureUserPasswordRejectsEmpty() {
 func testNormalizedUserAddressForms() {
     testing.assertEqual(normalizedUserAddress("10.0.9.1"), "10.0.9.1");
     testing.assertEqual(normalizedUserAddress("10.0.9.0/24"), "10.0.9.0/24");
-    testing.assertEqual(normalizedUserAddress(" 10.0.9.0/24 , 192.168.88.10 "),
+    testing.assertEqual(
+        normalizedUserAddress(" 10.0.9.0/24 , 192.168.88.10 "),
         "10.0.9.0/24,192.168.88.10");
 }
 

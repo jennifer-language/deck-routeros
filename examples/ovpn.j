@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * ovpn example - OpenVPN remote-access VPN server and clients.
@@ -29,7 +30,9 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def s as mt.OvpnServer init mt.ovpnServerStatus($c);
 io.printf("ovpn server enabled=%t port=%d mode=%s\n", $s.enabled, $s.port, $s.mode);
 def clients as list of mt.OvpnClient init mt.ovpnClients($c);
-for (def cl in $clients) { io.printf("ovpn client %s -> %s running=%t\n", $cl.name, $cl.connectTo, $cl.running); }
+for (def cl in $clients) {
+    io.printf("ovpn client %s -> %s running=%t\n", $cl.name, $cl.connectTo, $cl.running);
+}
 
 #   mt.enableOvpnServer($c, "router-le-cert", 1194);
 #   mt.addVpnUser($c, "carol", "her password", "ovpn", "laptop");

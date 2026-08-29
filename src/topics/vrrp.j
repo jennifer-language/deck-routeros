@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - VRRP: two routers, one gateway address, automatic failover.
 # Spliced into routeros.j via include - not a standalone module.
@@ -106,7 +107,13 @@ export func vrrpByName(c as Client, name as string) {
  *   # router B (standby): same vrid + address, lower priority
  *   # mt.setupVrrp($cb, "vrrplan", "brlan", 10, 100, "192.168.88.254/32");
  */
-export func setupVrrp(c as Client, name as string, interfaceName as string, vrid as int, priority as int, virtualAddress as string) {
+export func setupVrrp(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    vrid as int,
+    priority as int,
+    virtualAddress as string) {
     ensureCidr($virtualAddress);
     def id as string init addVrrp($c, $name, $interfaceName, $vrid, $priority);
     add($c, IP_ADDRESS_PATH, {"address": $virtualAddress, "interface": $name});
@@ -127,7 +134,12 @@ export func setupVrrp(c as Client, name as string, interfaceName as string, vrid
  * @throws {Error} kind "routeros" on bad input, a taken name, or a
  *                 vrid already used on that interface
  */
-export func addVrrp(c as Client, name as string, interfaceName as string, vrid as int, priority as int) {
+export func addVrrp(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    vrid as int,
+    priority as int) {
     ensureName($name, "VRRP interface");
     ensureVrid($vrid);
     ensureVrrpPriority($priority);
@@ -138,15 +150,18 @@ export func addVrrp(c as Client, name as string, interfaceName as string, vrid a
     def rows as list of map of string to string init getAll($c, VRRP_PATH);
     def clash as map of string to string init findVrrpRow($rows, $interfaceName, $vrid);
     if (len($clash) > 0) {
-        raiseError("vrid " + convert.toString($vrid) + " on \"" + $interfaceName
-            + "\" is already used by \"" + rowValue($clash, "name") + "\"");
+        raiseError("vrid " + convert.toString($vrid) + " on \"" + $interfaceName +
+            "\" is already used by \"" + rowValue($clash, "name") + "\"");
     }
-    return add($c, VRRP_PATH, {
-        "name": $name,
-        "interface": $interfaceName,
-        "vrid": convert.toString($vrid),
-        "priority": convert.toString($priority)
-    });
+    return add(
+        $c,
+        VRRP_PATH,
+        {
+            "name": $name,
+            "interface": $interfaceName,
+            "vrid": convert.toString($vrid),
+            "priority": convert.toString($priority)
+        });
 }
 
 /**
@@ -164,7 +179,10 @@ export func addVrrp(c as Client, name as string, interfaceName as string, vrid a
  */
 export func setVrrpPriority(c as Client, name as string, priority as int) {
     ensureVrrpPriority($priority);
-    set($c, VRRP_PATH, requiredId($c, VRRP_PATH, $name, "VRRP interface"),
+    set(
+        $c,
+        VRRP_PATH,
+        requiredId($c, VRRP_PATH, $name, "VRRP interface"),
         {"priority": convert.toString($priority)});
 }
 

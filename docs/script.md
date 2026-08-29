@@ -59,15 +59,15 @@ mt.updateScript($c, "nightly",
 
 ## Pitfalls
 
-- **RouterOS script, not Jennifer** — routeros validates the name and
+- **RouterOS script, not Jennifer** - routeros validates the name and
   that the source is non-empty, not the script's correctness. A syntax
   error or a missing permission surfaces in the router log at run time.
   Test one-liners in the RouterOS terminal first.
 - **Policies:** a script runs with its own `policy` (permission set). A
   script that reboots or writes config needs those policies, and the
-  *user* creating/running it needs them too — otherwise it silently does
+  *user* creating/running it needs them too - otherwise it silently does
   nothing.
-- **Deleting a script breaks schedules that call it by name** — remove
+- **Deleting a script breaks schedules that call it by name** - remove
   or repoint the scheduler entry too.
 - **Quoting:** RouterOS quotes inside the source need `\"` in the
   Jennifer string (see the log-message examples).

@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * radius example - central authentication via RADIUS.
@@ -27,8 +28,12 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def servers as list of mt.RadiusServer init mt.radiusServers($c);
-if (len($servers) == 0) { io.printf("no RADIUS servers configured\n"); }
-for (def s in $servers) { io.printf("radius %s for %s\n", $s.address, $s.services); }
+if (len($servers) == 0) {
+    io.printf("no RADIUS servers configured\n");
+}
+for (def s in $servers) {
+    io.printf("radius %s for %s\n", $s.address, $s.services);
+}
 
 #   mt.addRadiusServer($c, "10.0.9.20", "a shared secret", "login,ppp", "AD");
 

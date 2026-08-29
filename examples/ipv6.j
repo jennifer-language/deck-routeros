@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * ipv6 example - the IPv6 stack: settings, addresses, advertisements.
@@ -27,8 +28,11 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def s as mt.Ipv6Settings init mt.ipv6Settings($c);
-io.printf("ipv6 disabled=%t forward=%t acceptRA=%t\n",
-    $s.disabled, $s.forward, $s.acceptRouterAdvertisements);
+io.printf(
+    "ipv6 disabled=%t forward=%t acceptRA=%t\n",
+    $s.disabled,
+    $s.forward,
+    $s.acceptRouterAdvertisements);
 
 if ($s.disabled) {
     io.printf("  the stack is off - nothing else to report\n");
@@ -37,16 +41,27 @@ if ($s.disabled) {
     io.printf("addresses (%d):\n", len($addrs));
     for (def a in $addrs) {
         def origin as string init "static";
-        if ($a.dynamic) { $origin = "dynamic"; }
-        io.printf("  %-30s %-10s %s advertise=%t\n",
-            $a.address, $a.interfaceName, $origin, $a.advertise);
+        if ($a.dynamic) {
+            $origin = "dynamic";
+        }
+        io.printf(
+            "  %-30s %-10s %s advertise=%t\n",
+            $a.address,
+            $a.interfaceName,
+            $origin,
+            $a.advertise);
     }
 
     def nd as list of mt.Ipv6Nd init mt.ipv6Nd($c);
     io.printf("advertisements (%d):\n", len($nd));
     for (def n in $nd) {
-        io.printf("  %-10s M=%t O=%t dns=%t disabled=%t\n",
-            $n.interfaceName, $n.managed, $n.otherConfig, $n.advertiseDns, $n.disabled);
+        io.printf(
+            "  %-10s M=%t O=%t dns=%t disabled=%t\n",
+            $n.interfaceName,
+            $n.managed,
+            $n.otherConfig,
+            $n.advertiseDns,
+            $n.disabled);
     }
 }
 

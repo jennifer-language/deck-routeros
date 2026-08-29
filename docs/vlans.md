@@ -90,7 +90,7 @@ mt.setPortPvid($c, "brlan", "ether4", 20);
 mt.enableVlanFiltering($c, "brlan");
 ```
 
-`tagged` ports keep the VLAN tag (trunks — links to switches, or the
+`tagged` ports keep the VLAN tag (trunks - links to switches, or the
 bridge itself for inter-VLAN routing); `untagged` ports strip it
 (access ports for end devices), and each access port's **PVID** assigns
 untagged incoming frames to its VLAN. `bridgeVlans(c)` lists the table,
@@ -99,13 +99,13 @@ untagged incoming frames to its VLAN. `bridgeVlans(c)` lists the table,
 **Which model?** Sub-interfaces are simpler for a handful of VLANs
 terminated on the router (each becomes a routed interface). The
 VLAN-aware bridge is right when the router is also switching VLANs
-between ports, or driving a managed-switch topology — it is what
+between ports, or driving a managed-switch topology - it is what
 hardware offload accelerates.
 
 ### Danger: order matters
 
 Enabling `vlan-filtering` before the table and PVIDs are correct drops
-untagged traffic — **including your own management session** if it rides
+untagged traffic - **including your own management session** if it rides
 that bridge. Always: build the VLAN table and PVIDs first, enable
 filtering last, and keep a second way in (a separate management port, or
 a console cable) the first time.

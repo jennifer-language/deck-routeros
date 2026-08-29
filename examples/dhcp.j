@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * dhcp example - DHCP server, leases, and the WAN client.
@@ -27,12 +28,18 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def servers as list of mt.DhcpServer init mt.dhcpServers($c);
-for (def s in $servers) { io.printf("dhcp server %s on %s\n", $s.name, $s.interfaceName); }
+for (def s in $servers) {
+    io.printf("dhcp server %s on %s\n", $s.name, $s.interfaceName);
+}
 def leases as list of mt.DhcpLease init mt.dhcpLeases($c);
-for (def l in $leases) { io.printf("lease %s -> %s (%s)\n", $l.address, $l.mac, $l.status); }
+for (def l in $leases) {
+    io.printf("lease %s -> %s (%s)\n", $l.address, $l.mac, $l.status);
+}
 def wans as list of mt.DhcpClient init mt.dhcpClients($c);
 for (def w in $wans) {
-    if ($w.bound) { io.printf("wan %s: %s via %s\n", $w.interfaceName, $w.address, $w.gateway); }
+    if ($w.bound) {
+        io.printf("wan %s: %s via %s\n", $w.interfaceName, $w.address, $w.gateway);
+    }
 }
 
 #   mt.setupDhcp($c, "dhcplan", "brlan", "192.168.88.0/24",

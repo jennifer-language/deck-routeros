@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * container example - OCI containers on the router (v7).
@@ -27,17 +28,28 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def cts as list of mt.Container init mt.containers($c);
-if (len($cts) == 0) { io.printf("no containers (or the feature is not enabled)\n"); }
+if (len($cts) == 0) {
+    io.printf("no containers (or the feature is not enabled)\n");
+}
 for (def ct in $cts) {
-    io.printf("container %s (%s): %s envs=%s mounts=%s\n",
-        $ct.name, $ct.tag, $ct.status, $ct.envLists, $ct.mountLists);
+    io.printf(
+        "container %s (%s): %s envs=%s mounts=%s\n",
+        $ct.name,
+        $ct.tag,
+        $ct.status,
+        $ct.envLists,
+        $ct.mountLists);
 }
 
 def envs as list of mt.ContainerEnv init mt.containerEnvs($c);
-for (def e in $envs) { io.printf("env %s: %s=%s\n", $e.listName, $e.key, $e.value); }
+for (def e in $envs) {
+    io.printf("env %s: %s=%s\n", $e.listName, $e.key, $e.value);
+}
 
 def mounts as list of mt.ContainerMount init mt.containerMounts($c);
-for (def m in $mounts) { io.printf("mount %s: %s -> %s\n", $m.listName, $m.src, $m.dst); }
+for (def m in $mounts) {
+    io.printf("mount %s: %s -> %s\n", $m.listName, $m.src, $m.dst);
+}
 
 # create the config lists first, attach them, then start:
 #   mt.addContainerEnv($c, "pihole-env", "TZ", "Europe/Vienna");

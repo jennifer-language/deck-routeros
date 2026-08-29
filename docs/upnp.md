@@ -8,7 +8,7 @@ File: `src/topics/upnp.j`. Paths: `/ip/upnp` (`UPNP_PATH`),
 
 ## Background
 
-UPnP-IGD lets LAN devices — game consoles, some P2P apps, VoIP boxes —
+UPnP-IGD lets LAN devices - game consoles, some P2P apps, VoIP boxes -
 ask the router to open their own port forwards, no manual NAT rule. It
 is a convenience with a real security cost: *any* device on an
 `internal` interface can punch a hole from the internet to itself. Fine
@@ -47,9 +47,9 @@ mt.setUpnpInterface($c, "brlan", "internal");    # the trusted LAN
   devices you don't fully trust, leave it off and forward ports
   explicitly ([nat.md](nat.md)). Never mark a guest interface
   `internal`.
-- **Both roles are required** — an `external` without an `internal` (or
+- **Both roles are required** - an `external` without an `internal` (or
   vice versa) does nothing.
-- Forwards UPnP creates show up in `/ip/firewall/nat` (dynamic rules) —
+- Forwards UPnP creates show up in `/ip/firewall/nat` (dynamic rules) -
   inspect them with [nat.md](nat.md)'s `natRules(c)` to see what your
   devices opened.
 

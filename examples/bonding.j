@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * bonding example - link aggregation.
@@ -27,7 +28,9 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def bnds as list of mt.Bond init mt.bonds($c);
-if (len($bnds) == 0) { io.printf("no bonds configured\n"); }
+if (len($bnds) == 0) {
+    io.printf("no bonds configured\n");
+}
 for (def bn in $bnds) {
     io.printf("bond %s (%s) over %s running=%t\n", $bn.name, $bn.mode, $bn.slaves, $bn.running);
 }

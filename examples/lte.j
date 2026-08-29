@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * lte example - LTE / cellular uplink (signal, registration).
@@ -27,12 +28,19 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def ltes as list of mt.LteInterface init mt.lteInterfaces($c);
-if (len($ltes) == 0) { io.printf("no LTE modem on this router\n"); }
+if (len($ltes) == 0) {
+    io.printf("no LTE modem on this router\n");
+}
 for (def l in $ltes) {
     io.printf("lte %s running=%t\n", $l.name, $l.running);
     def s as mt.LteStatus init mt.lteStatus($c, $l.name);
-    io.printf("  %s on %s (%s), RSRP %s SINR %s\n",
-        $s.status, $s.operator, $s.accessTechnology, $s.rsrp, $s.sinr);
+    io.printf(
+        "  %s on %s (%s), RSRP %s SINR %s\n",
+        $s.status,
+        $s.operator,
+        $s.accessTechnology,
+        $s.rsrp,
+        $s.sinr);
 }
 
 #   mt.setLteApn($c, "lte1", "internet");

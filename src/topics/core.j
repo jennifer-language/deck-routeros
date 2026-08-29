@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - connection, generic verbs, shared validation and row helpers.
 # Spliced into routeros.j via include - not a standalone module.
@@ -25,7 +26,11 @@ def const DIGIT_CHARS as string init "0123456789";
  *        module holds no mutable state in Jennifer, so the flag rides
  *        on the client rather than sitting in a global.
  */
-export def struct Client { session as mikrotik.Session, user as string, verbose as bool };
+export def struct Client {
+    session as mikrotik.Session,
+    user as string,
+    verbose as bool
+};
 
 /**
  * Connect to a router over the plaintext API port (8728).
@@ -37,7 +42,11 @@ export def struct Client { session as mikrotik.Session, user as string, verbose 
  * @throws {Error} kind "mikrotik" when the connection or login fails
  */
 export func connect(host as string, user as string, password as string) {
-    return Client{ session: mikrotik.connect(mikrotik.options($host, $user, $password)), user: $user, verbose: verboseFromEnv() };
+    return Client{
+        session: mikrotik.connect(mikrotik.options($host, $user, $password)),
+        user: $user,
+        verbose: verboseFromEnv()
+    };
 }
 
 /**
@@ -50,7 +59,11 @@ export func connect(host as string, user as string, password as string) {
  * @throws {Error} kind "mikrotik" when the connection or login fails
  */
 export func connectTLS(host as string, user as string, password as string) {
-    return Client{ session: mikrotik.connect(mikrotik.optionsTLS($host, $user, $password)), user: $user, verbose: verboseFromEnv() };
+    return Client{
+        session: mikrotik.connect(mikrotik.optionsTLS($host, $user, $password)),
+        user: $user,
+        verbose: verboseFromEnv()
+    };
 }
 
 /**
@@ -65,13 +78,22 @@ export func connectTLS(host as string, user as string, password as string) {
  * @throws {Error} kind "routeros" on an invalid port,
  *                 kind "mikrotik" when the connection or login fails
  */
-export func connectWith(host as string, port as int, user as string, password as string, tls as bool) {
+export func connectWith(
+    host as string,
+    port as int,
+    user as string,
+    password as string,
+    tls as bool) {
     ensurePort($port);
     def o as mikrotik.Options init mikrotik.options($host, $user, $password);
     if ($tls) {
         $o = mikrotik.optionsTLS($host, $user, $password);
     }
-    return Client{ session: mikrotik.connect(mikrotik.withPort($o, $port)), user: $user, verbose: verboseFromEnv() };
+    return Client{
+        session: mikrotik.connect(mikrotik.withPort($o, $port)),
+        user: $user,
+        verbose: verboseFromEnv()
+    };
 }
 
 /**
@@ -169,7 +191,10 @@ export func update(c as Client, path as string, id as string, attrs as map of st
  * @return {map of string to string} the item's properties, or an empty map when absent
  */
 export func findByName(c as Client, path as string, name as string) {
-    def rows as list of map of string to string init apiPrintWhere($c, apiPath($path), ["?name=" + $name]);
+    def rows as list of map of string to string init apiPrintWhere(
+        $c,
+        apiPath($path),
+        ["?name=" + $name]);
     if (len($rows) == 0) {
         def empty as map of string to string init {};
         return $empty;
@@ -308,7 +333,7 @@ export func moveRuleToBottom(c as Client, path as string, id as string) {
  * @internal
  */
 func raiseError(message as string) {
-    throw Error{ kind: "routeros", message: $message, file: "", line: 0, col: 0 };
+    throw Error{kind: "routeros", message: $message, file: "", line: 0, col: 0};
 }
 
 /**
@@ -545,7 +570,8 @@ func ensureIpAddress(address as string) {
  */
 func ensureCidr(cidr as string) {
     if (not strings.contains($cidr, "/")) {
-        raiseError("\"" + $cidr + "\" is missing the prefix length - write it like \"192.168.88.0/24\"");
+        raiseError("\"" + $cidr +
+            "\" is missing the prefix length - write it like \"192.168.88.0/24\"");
     }
     try {
         ipnet.parse(strings.trim($cidr));
@@ -582,7 +608,8 @@ func ensureInNetwork(cidr as string, address as string, what as string) {
  * @internal
  */
 func badMac(mac as string) {
-    raiseError("\"" + $mac + "\" is not a MAC address - expected six hex pairs like \"AA:BB:CC:DD:EE:FF\"");
+    raiseError("\"" + $mac +
+        "\" is not a MAC address - expected six hex pairs like \"AA:BB:CC:DD:EE:FF\"");
 }
 
 /**
@@ -742,7 +769,7 @@ func requiredIdByComment(c as Client, path as string, comment as string, what as
  *   mt.addBridge($c, "brlan");     # prints: mt> /interface/bridge/add name=brlan
  */
 export func setVerbose(c as Client, enabled as bool) {
-    return Client{ session: $c.session, user: $c.user, verbose: $enabled };
+    return Client{session: $c.session, user: $c.user, verbose: $enabled};
 }
 
 /**
@@ -821,7 +848,10 @@ func apiPrintWhere(c as Client, path as string, queries as list of string) {
     if ($c.verbose) {
         io.printf("mt> %s/print%s\n", $path, formatQueries($queries));
     }
-    def rows as list of map of string to string init mikrotik.printWhere($c.session, $path, $queries);
+    def rows as list of map of string to string init mikrotik.printWhere(
+        $c.session,
+        $path,
+        $queries);
     logRows($c, $rows);
     return $rows;
 }

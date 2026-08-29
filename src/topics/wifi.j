@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - wifi: the modern wifiwave2 / ax menu (RouterOS v7).
 # Spliced into routeros.j via include - not a standalone module.
@@ -96,13 +97,17 @@ export func wifiInterfaces(c as Client) {
 export func setupWifi(c as Client, interfaceName as string, ssid as string, password as string) {
     ensureSsid($ssid);
     ensureWifiPassword($password);
-    set($c, WIFI_PATH, requiredId($c, WIFI_PATH, $interfaceName, "WiFi interface"), {
-        "configuration.mode": "ap",
-        "configuration.ssid": $ssid,
-        "security.authentication-types": "wpa2-psk,wpa3-psk",
-        "security.passphrase": $password,
-        "disabled": "no"
-    });
+    set(
+        $c,
+        WIFI_PATH,
+        requiredId($c, WIFI_PATH, $interfaceName, "WiFi interface"),
+        {
+            "configuration.mode": "ap",
+            "configuration.ssid": $ssid,
+            "security.authentication-types": "wpa2-psk,wpa3-psk",
+            "security.passphrase": $password,
+            "disabled": "no"
+        });
 }
 
 /**
@@ -117,7 +122,10 @@ export func setupWifi(c as Client, interfaceName as string, ssid as string, pass
  */
 export func setWifiPassphrase(c as Client, interfaceName as string, password as string) {
     ensureWifiPassword($password);
-    set($c, WIFI_PATH, requiredId($c, WIFI_PATH, $interfaceName, "WiFi interface"),
+    set(
+        $c,
+        WIFI_PATH,
+        requiredId($c, WIFI_PATH, $interfaceName, "WiFi interface"),
         {"security.passphrase": $password});
 }
 
@@ -132,20 +140,28 @@ export func setWifiPassphrase(c as Client, interfaceName as string, password as 
  * @return {string} the RouterOS id of the new virtual AP
  * @throws {Error} kind "routeros" on bad input or an unknown radio
  */
-export func addVirtualWifi(c as Client, masterInterface as string, name as string, ssid as string, password as string) {
+export func addVirtualWifi(
+    c as Client,
+    masterInterface as string,
+    name as string,
+    ssid as string,
+    password as string) {
     ensureName($name, "WiFi interface");
     ensureSsid($ssid);
     ensureWifiPassword($password);
     requiredId($c, WIFI_PATH, $masterInterface, "WiFi interface");
-    return add($c, WIFI_PATH, {
-        "name": $name,
-        "master-interface": $masterInterface,
-        "configuration.mode": "ap",
-        "configuration.ssid": $ssid,
-        "security.authentication-types": "wpa2-psk,wpa3-psk",
-        "security.passphrase": $password,
-        "disabled": "no"
-    });
+    return add(
+        $c,
+        WIFI_PATH,
+        {
+            "name": $name,
+            "master-interface": $masterInterface,
+            "configuration.mode": "ap",
+            "configuration.ssid": $ssid,
+            "security.authentication-types": "wpa2-psk,wpa3-psk",
+            "security.passphrase": $password,
+            "disabled": "no"
+        });
 }
 
 /**

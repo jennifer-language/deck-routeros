@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * mangle example - packet marking.
@@ -28,8 +29,14 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def mangles as list of mt.MangleRule init mt.mangleRules($c);
 for (def m in $mangles) {
-    io.printf("%s/%s marks=%s%s%s %s\n", $m.chain, $m.action,
-        $m.newConnectionMark, $m.newPacketMark, $m.newRoutingMark, $m.comment);
+    io.printf(
+        "%s/%s marks=%s%s%s %s\n",
+        $m.chain,
+        $m.action,
+        $m.newConnectionMark,
+        $m.newPacketMark,
+        $m.newRoutingMark,
+        $m.comment);
 }
 
 #   def mk as mt.FirewallRule init mt.firewallRule(mt.CHAIN_PREROUTING, mt.ACTION_ACCEPT);

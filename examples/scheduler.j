@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * scheduler example - scripts on a timer.
@@ -28,7 +29,12 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def tasks as list of mt.ScheduledTask init mt.scheduledTasks($c);
 for (def t in $tasks) {
-    io.printf("task %s: every %s, next %s, ran %d times\n", $t.name, $t.interval, $t.nextRun, $t.runCount);
+    io.printf(
+        "task %s: every %s, next %s, ran %d times\n",
+        $t.name,
+        $t.interval,
+        $t.nextRun,
+        $t.runCount);
 }
 
 #   mt.scheduleDaily($c, "nightly-backup", "03:00:00", "/system backup save name=nightly");

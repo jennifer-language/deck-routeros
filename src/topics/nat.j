@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - firewall NAT: masquerade and port forwarding.
 # Spliced into routeros.j via include - not a standalone module.
@@ -126,7 +127,13 @@ export func addMasquerade(c as Client, outInterface as string, comment as string
  * @example
  *   mt.forwardPort($c, "tcp", 8080, "192.168.88.10", 80, "web server");
  */
-export func forwardPort(c as Client, protocol as string, publicPort as int, toAddress as string, toPort as int, comment as string) {
+export func forwardPort(
+    c as Client,
+    protocol as string,
+    publicPort as int,
+    toAddress as string,
+    toPort as int,
+    comment as string) {
     return natForward($c, "", $protocol, $publicPort, $toAddress, $toPort, $comment);
 }
 
@@ -146,7 +153,14 @@ export func forwardPort(c as Client, protocol as string, publicPort as int, toAd
  * @return {string} the RouterOS id of the new rule
  * @throws {Error} kind "routeros" on bad input or an unknown interface
  */
-export func forwardPortOn(c as Client, inInterface as string, protocol as string, publicPort as int, toAddress as string, toPort as int, comment as string) {
+export func forwardPortOn(
+    c as Client,
+    inInterface as string,
+    protocol as string,
+    publicPort as int,
+    toAddress as string,
+    toPort as int,
+    comment as string) {
     requiredId($c, INTERFACE_PATH, $inInterface, "interface");
     return natForward($c, $inInterface, $protocol, $publicPort, $toAddress, $toPort, $comment);
 }
@@ -254,9 +268,9 @@ func ensureForwardProtocol(protocol as string) {
  */
 func findMasqueradeRow(rows as list of map of string to string, outInterface as string) {
     for (def row in $rows) {
-        if (rowValue($row, "chain") == CHAIN_SRCNAT
-                and rowValue($row, "action") == ACTION_MASQUERADE
-                and rowValue($row, "out-interface") == $outInterface) {
+        if (rowValue($row, "chain") == CHAIN_SRCNAT and
+            rowValue($row, "action") == ACTION_MASQUERADE and
+            rowValue($row, "out-interface") == $outInterface) {
             return $row;
         }
     }
@@ -279,7 +293,14 @@ func findMasqueradeRow(rows as list of map of string to string, outInterface as 
  * @throws {Error} kind "routeros" on bad input
  * @internal
  */
-func natForward(c as Client, inInterface as string, protocol as string, publicPort as int, toAddress as string, toPort as int, comment as string) {
+func natForward(
+    c as Client,
+    inInterface as string,
+    protocol as string,
+    publicPort as int,
+    toAddress as string,
+    toPort as int,
+    comment as string) {
     ensureForwardProtocol($protocol);
     ensurePort($publicPort);
     ensurePort($toPort);

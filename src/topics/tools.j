@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - diagnostics: ping, traceroute, bandwidth test, fetch, e-mail.
 # Spliced into routeros.j via include - not a standalone module.
@@ -133,7 +134,9 @@ export func pingWith(c as Client, host as string, count as int) {
     if ($count < 1 or $count > 100) {
         raiseError("the ping count must be between 1 and 100");
     }
-    def rows as list of map of string to string init apiTalk($c, PING_COMMAND,
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        PING_COMMAND,
         {"address": $target, "count": convert.toString($count)});
     return pingResultFromRow(mergeRows($rows));
 }
@@ -187,7 +190,13 @@ export func bandwidthTest(c as Client, host as string, seconds as int, direction
  * @throws {Error} kind "routeros" on bad input, kind "mikrotik" when
  *                 the server is unreachable or refuses the credentials
  */
-export func bandwidthTestWith(c as Client, host as string, seconds as int, direction as string, user as string, password as string) {
+export func bandwidthTestWith(
+    c as Client,
+    host as string,
+    seconds as int,
+    direction as string,
+    user as string,
+    password as string) {
     return bandwidthRun($c, $host, $seconds, $direction, $user, $password);
 }
 
@@ -227,7 +236,13 @@ func pingResultFromRow(row as map of string to string) {
  * @throws {Error} kind "routeros" on bad input
  * @internal
  */
-func bandwidthRun(c as Client, host as string, seconds as int, direction as string, user as string, password as string) {
+func bandwidthRun(
+    c as Client,
+    host as string,
+    seconds as int,
+    direction as string,
+    user as string,
+    password as string) {
     def target as string init strings.trim($host);
     ensureHost($target);
     ensureBandwidthParams($seconds, $direction);
@@ -242,8 +257,7 @@ func bandwidthRun(c as Client, host as string, seconds as int, direction as stri
     if ($password != "") {
         $attrs["password"] = $password;
     }
-    def rows as list of map of string to string init
-        apiTalk($c, BANDWIDTH_TEST_COMMAND, $attrs);
+    def rows as list of map of string to string init apiTalk($c, BANDWIDTH_TEST_COMMAND, $attrs);
     return bandwidthResultFromRow(mergeRows($rows));
 }
 
@@ -260,7 +274,8 @@ func ensureBandwidthParams(seconds as int, direction as string) {
         raiseError("the test duration must be between 1 and 300 seconds");
     }
     if (not lists.contains(BTEST_DIRECTIONS, $direction)) {
-        raiseError("unknown direction \"" + $direction + "\" - use one of: " + strings.join(BTEST_DIRECTIONS, ", "));
+        raiseError("unknown direction \"" + $direction + "\" - use one of: " +
+            strings.join(BTEST_DIRECTIONS, ", "));
     }
 }
 
@@ -331,8 +346,10 @@ export def struct FetchResult {
 export func traceroute(c as Client, host as string) {
     def target as string init strings.trim($host);
     ensureHost($target);
-    def rows as list of map of string to string init apiTalk($c,
-        TRACEROUTE_COMMAND, {"address": $target, "count": "1"});
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        TRACEROUTE_COMMAND,
+        {"address": $target, "count": "1"});
     def out as list of TracerouteHop init [];
     for (def row in $rows) {
         $out[] = tracerouteHopFromRow($row);
@@ -362,8 +379,10 @@ export func fetchUrl(c as Client, url as string) {
     if ($target == "" or not strings.startsWith($target, "http")) {
         raiseError("the fetch URL must be an http(s) URL");
     }
-    def rows as list of map of string to string init apiTalk($c,
-        FETCH_COMMAND, {"url": $target, "output": "user", "mode": "https"});
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        FETCH_COMMAND,
+        {"url": $target, "output": "user", "mode": "https"});
     return fetchResultFromRow(mergeRows($rows));
 }
 
@@ -382,8 +401,10 @@ export func downloadFile(c as Client, url as string, fileName as string) {
         raiseError("the download URL must be an http(s) URL");
     }
     ensureName($fileName, "file");
-    def rows as list of map of string to string init apiTalk($c,
-        FETCH_COMMAND, {"url": $target, "dst-path": $fileName, "mode": "https"});
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        FETCH_COMMAND,
+        {"url": $target, "dst-path": $fileName, "mode": "https"});
     return fetchResultFromRow(mergeRows($rows));
 }
 
@@ -401,7 +422,13 @@ export func downloadFile(c as Client, url as string, fileName as string) {
  * @param {string} password the SMTP password ("" when no auth)
  * @throws {Error} kind "routeros" on a bad server or port
  */
-export func configureEmail(c as Client, server as string, port as int, from as string, user as string, password as string) {
+export func configureEmail(
+    c as Client,
+    server as string,
+    port as int,
+    from as string,
+    user as string,
+    password as string) {
     configureEmailWith($c, $server, $port, $from, $user, $password, "");
 }
 
@@ -439,7 +466,14 @@ export func configureEmail(c as Client, server as string, port as int, from as s
  *       "[MikroTik gw1] <router@example.org>", "router", "secret",
  *       mt.EMAIL_TLS_STARTTLS);
  */
-export func configureEmailWith(c as Client, server as string, port as int, from as string, user as string, password as string, tls as string) {
+export func configureEmailWith(
+    c as Client,
+    server as string,
+    port as int,
+    from as string,
+    user as string,
+    password as string,
+    tls as string) {
     def host as string init strings.trim($server);
     ensureHost($host);
     ensurePort($port);
@@ -448,8 +482,7 @@ export func configureEmailWith(c as Client, server as string, port as int, from 
         ensureEmailTls($mode);
     }
     def names as map of string to string init emailPropertyNames($c);
-    def attrs as map of string to string init
-        {"port": convert.toString($port), "from": $from};
+    def attrs as map of string to string init {"port": convert.toString($port), "from": $from};
     $attrs[$names["server"]] = $host;
     if ($user != "") {
         $attrs["user"] = $user;
@@ -515,8 +548,7 @@ export func sendEmail(c as Client, recipient as string, subject as string, body 
     if ($target == "") {
         raiseError("the recipient must not be empty");
     }
-    apiRun($c, EMAIL_PATH + "/send",
-        {"to": $target, "subject": $subject, "body": $body});
+    apiRun($c, EMAIL_PATH + "/send", {"to": $target, "subject": $subject, "body": $body});
 }
 
 /**
@@ -587,7 +619,8 @@ func emailPropertyNames(c as Client) {
  */
 func ensureEmailTls(mode as string) {
     if ($mode != EMAIL_TLS_NONE and $mode != EMAIL_TLS_STARTTLS and $mode != EMAIL_TLS_IMPLICIT) {
-        raiseError("\"" + $mode + "\" is not a TLS mode - use EMAIL_TLS_NONE, EMAIL_TLS_STARTTLS, or EMAIL_TLS_IMPLICIT");
+        raiseError("\"" + $mode +
+            "\" is not a TLS mode - use EMAIL_TLS_NONE, EMAIL_TLS_STARTTLS, or EMAIL_TLS_IMPLICIT");
     }
 }
 

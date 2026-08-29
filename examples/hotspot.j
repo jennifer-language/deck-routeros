@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * hotspot example - the captive guest portal.
@@ -27,7 +28,9 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def portals as list of mt.HotspotServer init mt.hotspotServers($c);
-for (def h in $portals) { io.printf("hotspot %s on %s (pool %s)\n", $h.name, $h.interfaceName, $h.addressPool); }
+for (def h in $portals) {
+    io.printf("hotspot %s on %s (pool %s)\n", $h.name, $h.interfaceName, $h.addressPool);
+}
 def guests as list of mt.HotspotSession init mt.hotspotActive($c);
 io.printf("%d guests logged in\n", len($guests));
 

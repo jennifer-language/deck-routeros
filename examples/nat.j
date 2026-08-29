@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * nat example - masquerade and port forwarding.
@@ -28,8 +29,14 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def nats as list of mt.NatRule init mt.natRules($c);
 for (def n in $nats) {
-    io.printf("%s/%s dst-port %s -> %s:%s %s\n",
-        $n.chain, $n.action, $n.dstPort, $n.toAddresses, $n.toPorts, $n.comment);
+    io.printf(
+        "%s/%s dst-port %s -> %s:%s %s\n",
+        $n.chain,
+        $n.action,
+        $n.dstPort,
+        $n.toAddresses,
+        $n.toPorts,
+        $n.comment);
 }
 
 #   mt.addMasquerade($c, "ether1", "lan to internet");

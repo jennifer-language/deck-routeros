@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - L2TP: the works-on-every-device remote-access VPN.
 # Spliced into routeros.j via include - not a standalone module.
@@ -77,7 +78,9 @@ export func enableL2tpServer(c as Client, ipsecSecret as string) {
     if (strings.trim($ipsecSecret) == "") {
         raiseError("the IPsec secret must not be empty - L2TP without it is cleartext");
     }
-    apiRun($c, L2TP_SERVER_PATH + "/set",
+    apiRun(
+        $c,
+        L2TP_SERVER_PATH + "/set",
         {"enabled": "yes", "use-ipsec": "required", "ipsec-secret": $ipsecSecret});
     ensureInputAccept($c, "l2tp: server (l2tp)", {"protocol": "udp", "dst-port": "1701"});
     ensureInputAccept($c, "l2tp: server (ike)", {"protocol": "udp", "dst-port": "500"});
@@ -121,9 +124,22 @@ export func l2tpClients(c as Client) {
  * @return {string} the RouterOS id of the (new or existing) client
  * @throws {Error} kind "routeros" on bad input
  */
-export func addL2tpClient(c as Client, name as string, serverAddress as string, user as string, password as string) {
+export func addL2tpClient(
+    c as Client,
+    name as string,
+    serverAddress as string,
+    user as string,
+    password as string) {
     def none as map of string to string init {};
-    return vpnClientAdd($c, L2TP_CLIENT_PATH, "L2TP", $name, $serverAddress, $user, $password, $none);
+    return vpnClientAdd(
+        $c,
+        L2TP_CLIENT_PATH,
+        "L2TP",
+        $name,
+        $serverAddress,
+        $user,
+        $password,
+        $none);
 }
 
 /**

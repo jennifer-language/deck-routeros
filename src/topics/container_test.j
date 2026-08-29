@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the container topic.
 # Spliced into routeros_test.j via include - run with:
@@ -84,7 +85,12 @@ func testContainerFromRowCarriesLists() {
 }
 
 func testContainerEnvFromRow() {
-    def row as map of string to string init {".id": "*1", "list": "pihole-env", "key": "TZ", "value": "Europe/Vienna"};
+    def row as map of string to string init {
+        ".id": "*1",
+        "list": "pihole-env",
+        "key": "TZ",
+        "value": "Europe/Vienna"
+    };
     def e as ContainerEnv init containerEnvFromRow($row);
     testing.assertEqual($e.listName, "pihole-env");
     testing.assertEqual($e.key, "TZ");
@@ -92,7 +98,12 @@ func testContainerEnvFromRow() {
 }
 
 func testContainerMountFromRow() {
-    def row as map of string to string init {".id": "*2", "list": "pihole-etc", "src": "usb1/pihole/etc", "dst": "/etc/pihole"};
+    def row as map of string to string init {
+        ".id": "*2",
+        "list": "pihole-etc",
+        "src": "usb1/pihole/etc",
+        "dst": "/etc/pihole"
+    };
     def m as ContainerMount init containerMountFromRow($row);
     testing.assertEqual($m.listName, "pihole-etc");
     testing.assertEqual($m.src, "usb1/pihole/etc");

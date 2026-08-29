@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - SNMP: plug the router into your monitoring.
 # Spliced into routeros.j via include - not a standalone module.
@@ -117,8 +118,7 @@ export func enableSnmp(c as Client, community as string, addresses as string) {
  * @param {string} location where the box is (e.g. "rack 3, office Berlin")
  */
 export func setSnmpInfo(c as Client, contact as string, location as string) {
-    apiRun($c, SNMP_PATH + "/set",
-        {"contact": $contact, "location": $location});
+    apiRun($c, SNMP_PATH + "/set", {"contact": $contact, "location": $location});
 }
 
 /**

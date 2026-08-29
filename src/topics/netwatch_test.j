@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the netwatch topic.
 # Spliced into routeros_test.j via include - run with:
@@ -47,11 +48,7 @@ func testNetwatchFromRowDown() {
 }
 
 func testNetwatchFromRowUnknownIsNotUp() {
-    def row as map of string to string init {
-        ".id": "*3",
-        "host": "10.0.0.9",
-        "status": "unknown"
-    };
+    def row as map of string to string init {".id": "*3", "host": "10.0.0.9", "status": "unknown"};
     def n as NetwatchHost init netwatchFromRow($row);
     testing.assertEqual($n.status, "unknown");
     testing.assertFalse($n.up);

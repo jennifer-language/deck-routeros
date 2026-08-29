@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - containers: run OCI images on the router (RouterOS v7).
 # Spliced into routeros.j via include - not a standalone module.
@@ -129,7 +130,12 @@ export func containers(c as Client) {
  *   mt.setContainerMountLists($c, "pihole", ["pihole-etc"]);
  *   mt.startContainer($c, "pihole");
  */
-export func addContainer(c as Client, name as string, remoteImage as string, interfaceName as string, rootDir as string) {
+export func addContainer(
+    c as Client,
+    name as string,
+    remoteImage as string,
+    interfaceName as string,
+    rootDir as string) {
     ensureName($name, "container");
     if (strings.trim($remoteImage) == "") {
         raiseError("the remote image must not be empty (e.g. \"pihole/pihole:latest\")");
@@ -138,12 +144,15 @@ export func addContainer(c as Client, name as string, remoteImage as string, int
     if (strings.trim($rootDir) == "") {
         raiseError("the root directory must not be empty (e.g. \"usb1/pihole\")");
     }
-    return add($c, CONTAINER_PATH, {
-        "remote-image": strings.trim($remoteImage),
-        "interface": $interfaceName,
-        "root-dir": strings.trim($rootDir),
-        "comment": $name
-    });
+    return add(
+        $c,
+        CONTAINER_PATH,
+        {
+            "remote-image": strings.trim($remoteImage),
+            "interface": $interfaceName,
+            "root-dir": strings.trim($rootDir),
+            "comment": $name
+        });
 }
 
 /**
@@ -215,11 +224,10 @@ export func addContainerEnv(c as Client, listName as string, key as string, valu
     if (strings.trim($key) == "") {
         raiseError("the environment variable name must not be empty (e.g. \"TZ\")");
     }
-    return add($c, CONTAINER_ENVS_PATH, {
-        "list": $listName,
-        "key": strings.trim($key),
-        "value": $value
-    });
+    return add(
+        $c,
+        CONTAINER_ENVS_PATH,
+        {"list": $listName, "key": strings.trim($key), "value": $value});
 }
 
 /**
@@ -277,11 +285,10 @@ export func addContainerMount(c as Client, listName as string, src as string, ds
     if (strings.trim($dst) == "") {
         raiseError("the mount destination must not be empty (a path inside the container, e.g. \"/etc/pihole\")");
     }
-    return add($c, CONTAINER_MOUNTS_PATH, {
-        "list": $listName,
-        "src": strings.trim($src),
-        "dst": strings.trim($dst)
-    });
+    return add(
+        $c,
+        CONTAINER_MOUNTS_PATH,
+        {"list": $listName, "src": strings.trim($src), "dst": strings.trim($dst)});
 }
 
 /**

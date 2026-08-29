@@ -7,16 +7,16 @@ File: `src/topics/raw.j`. Path: `/ip/firewall/raw` (`RAW_PATH`).
 
 ## Background
 
-The raw table runs **before connection tracking** — earlier and cheaper
+The raw table runs **before connection tracking** - earlier and cheaper
 than the filter table. Two jobs:
 
-1. **Drop garbage as early as possible** — spoofed sources, bogons
+1. **Drop garbage as early as possible** - spoofed sources, bogons
    (addresses that should never appear on the internet), the flat part
    of a flood. Dropping here spares the conntrack table and CPU.
-2. **`notrack`** — exempt chosen traffic (very high-volume, or something
+2. **`notrack`** - exempt chosen traffic (very high-volume, or something
    that must not be tracked) from the connection table entirely.
 
-Raw has chains `prerouting` (incoming — the usual choice) and `output`.
+Raw has chains `prerouting` (incoming - the usual choice) and `output`.
 It reuses this module's firewall builder as the matcher.
 
 ## Struct
@@ -38,7 +38,7 @@ mt.RawRule { id, chain, action, protocol, srcAddress, dstAddress,
 | `moveRawRuleByComment(c, comment, beforeComment)` | the same, by comment handles |
 
 Build the matcher with `firewallRule(chain, action)` + the `with*`
-refiners — chain `CHAIN_PREROUTING`/`CHAIN_OUTPUT`, action
+refiners - chain `CHAIN_PREROUTING`/`CHAIN_OUTPUT`, action
 `accept`/`drop`/`ACTION_NOTRACK`.
 
 ## Examples
@@ -72,18 +72,18 @@ mt.addRawRule($c, $n);
 
 ## Pitfalls
 
-- **Raw sees untracked packets** — you can't match `connection-state`
+- **Raw sees untracked packets** - you can't match `connection-state`
   here (that is what tracking provides, and it hasn't run yet). Match on
   addresses, ports, interfaces, and address lists.
-- **Order and specificity matter** — a broad raw drop above a needed
+- **Order and specificity matter** - a broad raw drop above a needed
   accept blocks it, and rules append. Either build the `accept` first,
   or repair the order afterwards with `moveRawRule(c, id, beforeId)` /
   `moveRawRuleByComment(c, comment, beforeComment)` (pass `""` as the
   destination to send a rule to the bottom).
-- `notrack` disables NAT and stateful filtering for that traffic — use
+- `notrack` disables NAT and stateful filtering for that traffic - use
   it deliberately, not as a performance dial.
 - Raw drops are invisible to conntrack tools ([contrack.md](contrack.md))
-  precisely because they act before tracking — that is the point, but it
+  precisely because they act before tracking - that is the point, but it
   means you debug them from counters, not the connection table.
 
 ## Related

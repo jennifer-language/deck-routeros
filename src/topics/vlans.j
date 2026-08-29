@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - VLAN tagged interfaces.
 # Spliced into routeros.j via include - not a standalone module.
@@ -89,11 +90,10 @@ export func addVlan(c as Client, name as string, vlanId as int, interfaceName as
     ensureName($name, "VLAN");
     ensureVlanId($vlanId);
     requiredId($c, INTERFACE_PATH, $interfaceName, "interface");
-    return add($c, VLAN_PATH, {
-        "name": $name,
-        "vlan-id": convert.toString($vlanId),
-        "interface": $interfaceName
-    });
+    return add(
+        $c,
+        VLAN_PATH,
+        {"name": $name, "vlan-id": convert.toString($vlanId), "interface": $interfaceName});
 }
 
 /**

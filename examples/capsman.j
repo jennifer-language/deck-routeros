@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * capsman example - central management of many access points (CAPsMAN).
@@ -27,10 +28,15 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def st as mt.CapsmanStatus init mt.capsmanStatus($c);
-if ($st.version == 0) { io.printf("no CAPsMAN on this router\n"); }
-else { io.printf("CAPsMAN v%d enabled=%t, %d managed APs\n", $st.version, $st.enabled, $st.managedAps); }
+if ($st.version == 0) {
+    io.printf("no CAPsMAN on this router\n");
+} else {
+    io.printf("CAPsMAN v%d enabled=%t, %d managed APs\n", $st.version, $st.enabled, $st.managedAps);
+}
 def aps as list of mt.ManagedAp init mt.managedAps($c);
-for (def ap in $aps) { io.printf("AP %s at %s: %s\n", $ap.identity, $ap.address, $ap.state); }
+for (def ap in $aps) {
+    io.printf("AP %s at %s: %s\n", $ap.identity, $ap.address, $ap.state);
+}
 
 #   mt.enableCapsman($c);   # then configuration + provisioning via generic verbs
 

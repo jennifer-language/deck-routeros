@@ -9,8 +9,8 @@ File: `src/topics/interfacelist.j`. Paths: `/interface/list`
 
 ## Background
 
-An interface list is a named group of interfaces — `WAN`, `LAN`,
-`MGMT` — that firewall (and other) rules can match as a whole. This is
+An interface list is a named group of interfaces - `WAN`, `LAN`,
+`MGMT` - that firewall (and other) rules can match as a whole. This is
 how the RouterOS v7 default config is built: rules say "drop from `WAN`"
 rather than naming `ether1`, so when you add a second uplink or move a
 port, you edit the *list*, not a pile of rules. The built-in lists
@@ -35,7 +35,7 @@ mt.InterfaceList { id, name, dynamic, comment }
 
 Firewall matching lives in the firewall builder:
 `withInInterfaceList(rule, listName)` and
-`withOutInterfaceList(rule, listName)` — see [firewall.md](firewall.md).
+`withOutInterfaceList(rule, listName)` - see [firewall.md](firewall.md).
 
 ## Example: the WAN/LAN pattern
 
@@ -62,12 +62,12 @@ for (def il in $lists) {
 
 ## Pitfalls
 
-- **A list is only useful once rules reference it** — grouping alone
+- **A list is only useful once rules reference it** - grouping alone
   changes nothing; the payoff is the firewall matchers.
 - Put a new uplink into `WAN` *before* it carries traffic, so the WAN
   rules protect it from the first packet.
 - The `dynamic` built-in list holds interfaces added by other features
-  (e.g. a running VPN) — don't hand-manage it.
+  (e.g. a running VPN) - don't hand-manage it.
 
 ## Related
 

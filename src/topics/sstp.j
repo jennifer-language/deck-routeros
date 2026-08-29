@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - SSTP: a TLS remote-access VPN that crosses firewalls.
 # Spliced into routeros.j via include - not a standalone module.
@@ -78,7 +79,9 @@ export func sstpServerStatus(c as Client) {
 export func enableSstpServer(c as Client, certificate as string, port as int) {
     ensurePort($port);
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
-    apiRun($c, SSTP_SERVER_PATH + "/set",
+    apiRun(
+        $c,
+        SSTP_SERVER_PATH + "/set",
         {"enabled": "yes", "certificate": $certificate, "port": convert.toString($port)});
     ensureInputAccept($c, "sstp: server", {"protocol": "tcp", "dst-port": convert.toString($port)});
 }
@@ -119,9 +122,22 @@ export func sstpClients(c as Client) {
  * @return {string} the RouterOS id of the (new or existing) client
  * @throws {Error} kind "routeros" on bad input
  */
-export func addSstpClient(c as Client, name as string, serverAddress as string, user as string, password as string) {
+export func addSstpClient(
+    c as Client,
+    name as string,
+    serverAddress as string,
+    user as string,
+    password as string) {
     def extra as map of string to string init {"verify-server-certificate": "no"};
-    return vpnClientAdd($c, SSTP_CLIENT_PATH, "SSTP", $name, $serverAddress, $user, $password, $extra);
+    return vpnClientAdd(
+        $c,
+        SSTP_CLIENT_PATH,
+        "SSTP",
+        $name,
+        $serverAddress,
+        $user,
+        $password,
+        $extra);
 }
 
 /**

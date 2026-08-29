@@ -8,7 +8,7 @@ File: `src/topics/health.j`. Path: `/system/health`
 
 ## Background
 
-Bigger MikroTiks expose hardware sensors — CPU and board temperatures,
+Bigger MikroTiks expose hardware sensors - CPU and board temperatures,
 supply voltage, fan RPM, PSU state. On a small home router there may be
 none. This topic reads whatever the model reports; an empty result is
 normal, not an error.
@@ -45,7 +45,7 @@ monitoring system).
 
 ## Pitfalls
 
-- **Sensor names and units vary by model** — do not hard-code a name
+- **Sensor names and units vary by model** - do not hard-code a name
   without checking `healthSensors` on the actual hardware. Values are
   strings as reported (RouterOS 7 normalizes many to plain numbers).
 - No sensors ≠ a problem; it just means the board has none exposed.

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the routing topic.
 # Spliced into routeros_test.j via include - run with:
@@ -53,9 +54,7 @@ func testStaticRouteRowUnknownDestinationIsMiss() {
 }
 
 func testStaticRouteRowMissingDynamicKeyIsStatic() {
-    def rows as list of map of string to string init [
-        {".id": "*1", "dst-address": "0.0.0.0/0"}
-    ];
+    def rows as list of map of string to string init [{".id": "*1", "dst-address": "0.0.0.0/0"}];
     def row as map of string to string init staticRouteRow($rows, "0.0.0.0/0");
     testing.assertEqual(rowValue($row, ".id"), "*1");
 }
@@ -136,8 +135,7 @@ func testFindRoutingRuleRowMatchesBoth() {
         {".id": "*2", "src-address": "10.30.0.0/24", "table": "main"},
         {".id": "*3", "src-address": "10.40.0.0/24", "table": "backupisp"}
     ];
-    def row as map of string to string init
-        findRoutingRuleRow($rows, "10.30.0.0/24", "backupisp");
+    def row as map of string to string init findRoutingRuleRow($rows, "10.30.0.0/24", "backupisp");
     testing.assertEqual(rowValue($row, ".id"), "*1");
 }
 
@@ -145,7 +143,6 @@ func testFindRoutingRuleRowMissOnTableMismatch() {
     def rows as list of map of string to string init [
         {".id": "*1", "src-address": "10.30.0.0/24", "table": "backupisp"}
     ];
-    def row as map of string to string init
-        findRoutingRuleRow($rows, "10.30.0.0/24", "otherisp");
+    def row as map of string to string init findRoutingRuleRow($rows, "10.30.0.0/24", "otherisp");
     testing.assertEqual(len($row), 0);
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * arp example - the ARP table (who is on the LAN).
@@ -29,7 +30,12 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def neighbours as list of mt.ArpEntry init mt.arpTable($c);
 for (def n in $neighbours) {
     if ($n.complete) {
-        io.printf("arp %s -> %s on %s dynamic=%t\n", $n.address, $n.mac, $n.interfaceName, $n.dynamic);
+        io.printf(
+            "arp %s -> %s on %s dynamic=%t\n",
+            $n.address,
+            $n.mac,
+            $n.interfaceName,
+            $n.dynamic);
     }
 }
 

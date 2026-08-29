@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - mangle: marking traffic for queues and policy routing.
 # Spliced into routeros.j via include - not a standalone module.
@@ -105,8 +106,10 @@ export func setupPacketMark(c as Client, markName as string, matcher as Firewall
     ensureName($markName, "packet mark");
     def pair as list of map of string to string init packetMarkRuleAttrs($matcher, $markName);
     def rows as list of map of string to string init getAll($c, MANGLE_PATH);
-    def existing as map of string to string init
-        findRowByField($rows, "comment", "mark: " + $markName + " (packets)");
+    def existing as map of string to string init findRowByField(
+        $rows,
+        "comment",
+        "mark: " + $markName + " (packets)");
     if (len($existing) > 0) {
         return rowValue($existing, ".id");
     }
@@ -128,14 +131,15 @@ export func removePacketMark(c as Client, markName as string) {
     def found as int init 0;
     for (def row in $rows) {
         def comment as string init rowValue($row, "comment");
-        if ($comment == "mark: " + $markName + " (connections)"
-                or $comment == "mark: " + $markName + " (packets)") {
+        if ($comment == "mark: " + $markName + " (connections)" or $comment == "mark: " +
+            $markName + " (packets)") {
             remove($c, MANGLE_PATH, rowValue($row, ".id"));
             $found = $found + 1;
         }
     }
     if ($found == 0) {
-        raiseError("no packet mark \"" + $markName + "\" was found - was it created with setupPacketMark?");
+        raiseError("no packet mark \"" + $markName +
+            "\" was found - was it created with setupPacketMark?");
     }
 }
 
@@ -212,8 +216,10 @@ export func clampTcpMss(c as Client, interfaceName as string) {
     def directions as list of string init ["out", "in"];
     for (def direction in $directions) {
         def attrs as map of string to string init mssClampAttrs($interfaceName, $direction);
-        def existing as map of string to string init
-            findRowByField($rows, "comment", $attrs["comment"]);
+        def existing as map of string to string init findRowByField(
+            $rows,
+            "comment",
+            $attrs["comment"]);
         if (len($existing) == 0) {
             add($c, MANGLE_PATH, $attrs);
         }
@@ -232,8 +238,8 @@ export func removeTcpMssClamp(c as Client, interfaceName as string) {
     def found as int init 0;
     for (def row in $rows) {
         def comment as string init rowValue($row, "comment");
-        if ($comment == "mss clamp: " + $interfaceName + " (out)"
-                or $comment == "mss clamp: " + $interfaceName + " (in)") {
+        if ($comment == "mss clamp: " + $interfaceName + " (out)" or $comment == "mss clamp: " +
+            $interfaceName + " (in)") {
             remove($c, MANGLE_PATH, rowValue($row, ".id"));
             $found = $found + 1;
         }

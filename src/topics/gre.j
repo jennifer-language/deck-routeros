@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - GRE tunnels: a routed point-to-point link over IP.
 # Spliced into routeros.j via include - not a standalone module.
@@ -109,7 +110,11 @@ export func addGreTunnel(c as Client, name as string, remoteAddress as string) {
  * @return {string} the RouterOS id of the new tunnel
  * @throws {Error} kind "routeros" on bad input or an empty secret
  */
-export func addSecureGreTunnel(c as Client, name as string, remoteAddress as string, ipsecSecret as string) {
+export func addSecureGreTunnel(
+    c as Client,
+    name as string,
+    remoteAddress as string,
+    ipsecSecret as string) {
     if (strings.trim($ipsecSecret) == "") {
         raiseError("the IPsec secret must not be empty - it is the only thing protecting the tunnel");
     }
@@ -174,7 +179,8 @@ func greAdd(c as Client, name as string, remoteAddress as string, secret as stri
     def rows as list of map of string to string init getAll($c, GRE_PATH);
     def clash as map of string to string init findRowByField($rows, "remote-address", $remote);
     if (len($clash) > 0) {
-        raiseError("a GRE tunnel to " + $remote + " already exists: \"" + rowValue($clash, "name") + "\"");
+        raiseError("a GRE tunnel to " + $remote + " already exists: \"" + rowValue($clash, "name") +
+            "\"");
     }
     def attrs as map of string to string init {"name": $name, "remote-address": $remote};
     if ($secret != "") {

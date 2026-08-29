@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * system example - system info, identity, and updates.
@@ -27,13 +28,23 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def info as mt.SystemInfo init mt.systemInfo($c);
-io.printf("%s: %s on %s (%s), up %s\n",
-    mt.identity($c), $info.version, $info.boardName, $info.architecture, $info.uptime);
+io.printf(
+    "%s: %s on %s (%s), up %s\n",
+    mt.identity($c),
+    $info.version,
+    $info.boardName,
+    $info.architecture,
+    $info.uptime);
 def rb as mt.Routerboard init mt.routerboard($c);
-if ($rb.upgradeAvailable) { io.printf("firmware %s -> %s\n", $rb.currentFirmware, $rb.upgradeFirmware); }
+if ($rb.upgradeAvailable) {
+    io.printf("firmware %s -> %s\n", $rb.currentFirmware, $rb.upgradeFirmware);
+}
 def st as mt.UpdateStatus init mt.checkForUpdates($c);
-if ($st.updateAvailable) { io.printf("RouterOS %s -> %s available\n", $st.installedVersion, $st.latestVersion); }
-else { io.printf("RouterOS is up to date (%s)\n", $st.installedVersion); }
+if ($st.updateAvailable) {
+    io.printf("RouterOS %s -> %s available\n", $st.installedVersion, $st.latestVersion);
+} else {
+    io.printf("RouterOS is up to date (%s)\n", $st.installedVersion);
+}
 
 #   mt.installUpdates($c);          # downloads + reboots
 #   mt.reboot($c);

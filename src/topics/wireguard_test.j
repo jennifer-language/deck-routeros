@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the wireguard topic.
 # Spliced into routeros_test.j via include - run with:
@@ -37,7 +38,8 @@ func testEnsureWireguardKeyRejectsBadCharacter() {
 
 func testNormalizedAllowedAddressForms() {
     testing.assertEqual(normalizedAllowedAddress("10.100.0.2/32"), "10.100.0.2/32");
-    testing.assertEqual(normalizedAllowedAddress(" 10.100.0.0/24 , 192.168.88.0/24 "),
+    testing.assertEqual(
+        normalizedAllowedAddress(" 10.100.0.0/24 , 192.168.88.0/24 "),
         "10.100.0.0/24,192.168.88.0/24");
     testing.assertEqual(normalizedAllowedAddress("0.0.0.0/0"), "0.0.0.0/0");
 }

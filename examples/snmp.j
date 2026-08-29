@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * snmp example - SNMP for monitoring.
@@ -27,9 +28,15 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def snmp as mt.SnmpSettings init mt.snmpSettings($c);
-io.printf("snmp enabled=%t, contact=%s, location=%s\n", $snmp.enabled, $snmp.contact, $snmp.location);
+io.printf(
+    "snmp enabled=%t, contact=%s, location=%s\n",
+    $snmp.enabled,
+    $snmp.contact,
+    $snmp.location);
 def coms as list of mt.SnmpCommunity init mt.snmpCommunities($c);
-for (def com in $coms) { io.printf("community %s from %s\n", $com.name, $com.addresses); }
+for (def com in $coms) {
+    io.printf("community %s from %s\n", $com.name, $com.addresses);
+}
 
 #   mt.enableSnmp($c, "mon4711", "10.0.9.0/24");
 #   mt.setSnmpInfo($c, "noc@example.org", "rack 3, office Berlin");

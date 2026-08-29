@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * users example - router accounts, groups, and active sessions.
@@ -28,10 +29,17 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def accounts as list of mt.User init mt.users($c);
 for (def u in $accounts) {
-    io.printf("user %s (%s) disabled=%t last login %s\n", $u.name, $u.group, $u.disabled, $u.lastLoggedIn);
+    io.printf(
+        "user %s (%s) disabled=%t last login %s\n",
+        $u.name,
+        $u.group,
+        $u.disabled,
+        $u.lastLoggedIn);
 }
 def sessions as list of mt.UserSession init mt.activeUsers($c);
-for (def s in $sessions) { io.printf("active: %s via %s from %s\n", $s.name, $s.via, $s.address); }
+for (def s in $sessions) {
+    io.printf("active: %s via %s from %s\n", $s.name, $s.via, $s.address);
+}
 
 #   mt.addUser($c, "monitoring", "a long random password", mt.GROUP_READ);
 #   mt.restrictUser($c, "monitoring", "10.0.9.0/24");

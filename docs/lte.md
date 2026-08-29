@@ -8,7 +8,7 @@ File: `src/topics/lte.j`. Paths: `/interface/lte` (`LTE_PATH`),
 
 ## Background
 
-A cellular modem gives the router a mobile-broadband uplink — the
+A cellular modem gives the router a mobile-broadband uplink - the
 classic **backup WAN** (fail over to LTE when the wired line dies) or
 the primary link at a site with no wired internet. Two things determine
 whether it works: the **APN** (the carrier's access-point name, from the
@@ -56,7 +56,7 @@ mt.setLteApn($c, "lte1", "internet");
 LTE as a backup WAN, in one picture: give it a route with a higher
 distance than the primary ([routing.md](routing.md)), masquerade it
 ([nat.md](nat.md)), and let distance-based failover switch to it when
-the primary gateway dies — optionally watch the primary with
+the primary gateway dies - optionally watch the primary with
 [netwatch.md](netwatch.md).
 
 ## Pitfalls
@@ -64,7 +64,7 @@ the primary gateway dies — optionally watch the primary with
 - **Signal reality check:** RSRP better than about −90 dBm is good,
   −100 to −110 is marginal, worse drops out. An external antenna and
   moving the router to a window fix more than any config.
-- **APN comes from the carrier** — a wrong one registers on the network
+- **APN comes from the carrier** - a wrong one registers on the network
   but passes no data. Some SIMs need a username/password too (generic
   verbs on the APN profile).
 - **Data caps:** as a *backup*, make sure normal traffic doesn't

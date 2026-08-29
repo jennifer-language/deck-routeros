@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the arp topic.
 # Spliced into routeros_test.j via include - run with:
@@ -67,8 +68,7 @@ func testFindStaticArpRowSkipsDynamic() {
         {".id": "*1", "address": "192.168.88.50", "interface": "brlan", "dynamic": "true"},
         {".id": "*2", "address": "192.168.88.50", "interface": "brlan", "dynamic": "false"}
     ];
-    def row as map of string to string init
-        findStaticArpRow($rows, "192.168.88.50", "brlan");
+    def row as map of string to string init findStaticArpRow($rows, "192.168.88.50", "brlan");
     testing.assertEqual(rowValue($row, ".id"), "*2");
 }
 
@@ -76,8 +76,7 @@ func testFindStaticArpRowChecksInterface() {
     def rows as list of map of string to string init [
         {".id": "*1", "address": "192.168.88.50", "interface": "brguest", "dynamic": "false"}
     ];
-    def row as map of string to string init
-        findStaticArpRow($rows, "192.168.88.50", "brlan");
+    def row as map of string to string init findStaticArpRow($rows, "192.168.88.50", "brlan");
     testing.assertEqual(len($row), 0);
 }
 

@@ -7,8 +7,8 @@ File: `src/topics/container.j`. Path: `/container` (`CONTAINER_PATH`).
 
 ## Background
 
-RouterOS 7 can run OCI (Docker) images directly on the router — a Pi-hole,
-an AdGuard, a small agent — on ARM/ARM64/x86 models with enough storage.
+RouterOS 7 can run OCI (Docker) images directly on the router - a Pi-hole,
+an AdGuard, a small agent - on ARM/ARM64/x86 models with enough storage.
 It is deliberately gated: the `container` package must be installed and
 container support explicitly enabled in the device settings (a
 `devel`-signed step, done once at the console). This topic manages the
@@ -24,7 +24,7 @@ mt.ContainerEnv   { id, listName, key, value }
 mt.ContainerMount { id, listName, src, dst }
 ```
 
-`Container.name` is the handle **you** gave it — its `comment`. RouterOS's
+`Container.name` is the handle **you** gave it - its `comment`. RouterOS's
 own `name` property on a container row is read-only and reports the image
 tag (`pihole:latest`), so `name` falls back to that only when there is no
 comment. `running` reads the router's plain `running` flag, falling back
@@ -50,14 +50,14 @@ to the `status` word on builds that send one.
 
 ## Environment and mounts
 
-An image is configured by environment variables and by mounts — a
+An image is configured by environment variables and by mounts - a
 container's own `/etc` mounted out onto a disk is what makes its state
 survive a re-pull. Both are **named lists** on the router
 (`/container/envs`, `/container/mounts`): entries carry a `list` name,
 and a container references the lists it wants by name.
 
 Order matters. Create the entries, create the container, attach the
-lists, *then* start it — most images read their config only at startup,
+lists, *then* start it - most images read their config only at startup,
 so attaching afterwards is a stop/start away from taking effect.
 
 ```jennifer
@@ -70,7 +70,7 @@ mt.setContainerMountLists($c, "pihole", ["pihole-etc"]);
 ```
 
 Re-running a provisioning script? Clear a list first so entries do not
-pile up — `removeContainerEnvList(c, "pihole-env")` returns how many it
+pile up - `removeContainerEnvList(c, "pihole-env")` returns how many it
 deleted. Passing an empty list to `setContainerEnvLists` detaches all of
 them.
 
@@ -97,25 +97,25 @@ for (def ct in $cts) { io.printf("%s (%s): %s\n", $ct.name, $ct.tag, $ct.status)
 
 ## Pitfalls
 
-- **Storage.** Containers extract onto the router's disk — a few hundred
+- **Storage.** Containers extract onto the router's disk - a few hundred
   MB each. Small flash fills fast; point `rootDir` at USB/NVMe, and make
-  sure that disk is actually formatted ([disk.md](disk.md)) — an unformatted
+  sure that disk is actually formatted ([disk.md](disk.md)) - an unformatted
   one shows up much later as a container failing to extract for "no space".
 - **Networking is yours.** The container talks through its veth; giving
   it internet and LAN access is ordinary [bridging](bridges.md) /
   [routing](routing.md) / [NAT](nat.md) work.
 - **The list field names are not what you would guess.** On the router,
   entries group under `list` (not `name`), and a container references them
-  through `envlists` / `mountlists` — *plural*. The helpers above spell
+  through `envlists` / `mountlists` - *plural*. The helpers above spell
   it correctly; if you drop to the generic verbs, use those names, or
   RouterOS answers `!trap: unknown parameter`.
 - **A container's `name` is not yours to set.** Identify your containers
-  by the comment `addContainer` writes — which is exactly what
+  by the comment `addContainer` writes - which is exactly what
   `Container.name` and every `*Container(c, name)` call already match on.
 - **Security surface.** A container is real software running on your
   router; treat its image and exposure like any other host.
 - Enabling container support needs a reboot and a deliberate,
-  console-side step — this library will not silently flip that gate.
+  console-side step - this library will not silently flip that gate.
 
 ## Related
 

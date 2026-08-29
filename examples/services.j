@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * services example - management services (hardening the ways in).
@@ -29,8 +30,11 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def svcs as list of mt.Service init mt.services($c);
 for (def s in $svcs) {
     if (not $s.disabled) {
-        if ($s.address == "") { io.printf("service %s port %d: open to anywhere\n", $s.name, $s.port); }
-        else { io.printf("service %s port %d: restricted to %s\n", $s.name, $s.port, $s.address); }
+        if ($s.address == "") {
+            io.printf("service %s port %d: open to anywhere\n", $s.name, $s.port);
+        } else {
+            io.printf("service %s port %d: restricted to %s\n", $s.name, $s.port, $s.address);
+        }
     }
 }
 

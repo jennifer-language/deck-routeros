@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - bonding: several ethernet links acting as one.
 # Spliced into routeros.j via include - not a standalone module.
@@ -14,8 +15,13 @@ export def const BOND_LACP as string init "802.3ad";
 export def const BOND_ACTIVE_BACKUP as string init "active-backup";
 
 def const BONDING_MODES as list of string init [
-    "balance-rr", "active-backup", "balance-xor", "broadcast",
-    "802.3ad", "balance-tlb", "balance-alb"
+    "balance-rr",
+    "active-backup",
+    "balance-xor",
+    "broadcast",
+    "802.3ad",
+    "balance-tlb",
+    "balance-alb"
 ];
 
 /**
@@ -149,12 +155,10 @@ export func addFailoverBond(c as Client, name as string, slaves as string, prima
     def members as string init normalizedSlaves($slaves);
     ensurePrimaryInSlaves($members, $primary);
     ensureSlavesFree($c, $members, "");
-    return add($c, BONDING_PATH, {
-        "name": $name,
-        "slaves": $members,
-        "mode": BOND_ACTIVE_BACKUP,
-        "primary": $primary
-    });
+    return add(
+        $c,
+        BONDING_PATH,
+        {"name": $name, "slaves": $members, "mode": BOND_ACTIVE_BACKUP, "primary": $primary});
 }
 
 /**
@@ -220,7 +224,8 @@ export func disableBond(c as Client, name as string) {
  */
 func ensureBondMode(mode as string) {
     if (not lists.contains(BONDING_MODES, $mode)) {
-        raiseError("unknown bonding mode \"" + $mode + "\" - use one of: " + strings.join(BONDING_MODES, ", "));
+        raiseError("unknown bonding mode \"" + $mode + "\" - use one of: " +
+            strings.join(BONDING_MODES, ", "));
     }
 }
 
@@ -299,7 +304,8 @@ func bondUsingSlave(rows as list of map of string to string, name as string) {
  */
 func ensurePrimaryInSlaves(slavesCsv as string, primary as string) {
     if (not bondHasSlave($slavesCsv, $primary)) {
-        raiseError("the primary \"" + $primary + "\" must be one of the bond's slaves (" + $slavesCsv + ")");
+        raiseError("the primary \"" + $primary + "\" must be one of the bond's slaves (" +
+            $slavesCsv + ")");
     }
 }
 

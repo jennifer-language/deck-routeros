@@ -11,7 +11,7 @@ from.
 All snippets assume an established connection:
 
 ```jennifer
-import "./routeros.j" as mt;
+import "@jennifer/routeros/" as mt;
 
 def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
 # ... snippets go here ...
@@ -25,7 +25,7 @@ with `try { ... } catch (e) { io.printf("%s\n", $e.message); }`.
 
 Verbose mode: `$c = mt.setVerbose($c, true);` prints every command the
 client sends to stdout (`mt> /ip/address/add address=... interface=...`),
-with credentials redacted — see [core.md](core.md). It returns a copy, so
+with credentials redacted - see [core.md](core.md). It returns a copy, so
 keep the returned client. `MT_VERBOSE=1` in the environment turns it on
 at `connect` time without touching the script.
 
@@ -106,11 +106,11 @@ One runnable example per topic lives in [`../examples/`](../examples/)
 
 MikroTik and RouterOS are trademarks of SIA Mikrotīkls. routeros is an
 independent, community-written client library, **not affiliated with,
-endorsed, or supported by SIA Mikrotīkls** — and it configures live
+endorsed, or supported by SIA Mikrotīkls** - and it configures live
 network equipment. **Use at your own risk**; no warranty of any kind.
 
-Licensed under the **GNU LGPL v3.0 only** — see
-[../LICENSE.md](../LICENSE.md).
+Licensed under the **GNU LGPL v3.0 only** - see
+[../LICENSE](../LICENSE).
 
 ## Running the tests
 

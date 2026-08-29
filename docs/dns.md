@@ -111,7 +111,7 @@ for (def a in $adlists) { io.printf("%s blocks %s names\n", $a.url, $a.matchCoun
 ```
 
 `addAdlist` is idempotent by URL; `removeAdlist(c, url)` removes one.
-Large lists cost RAM (the router holds them in memory) — a small box
+Large lists cost RAM (the router holds them in memory) - a small box
 may not fit a million-entry list.
 
 ## Pitfalls

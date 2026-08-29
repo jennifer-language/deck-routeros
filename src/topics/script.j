@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - the script repository: named RouterOS scripts.
 # Spliced into routeros.j via include - not a standalone module.
@@ -124,8 +125,7 @@ export func updateScript(c as Client, name as string, source as string) {
  *                 kind "mikrotik" when the script itself errors
  */
 export func runScript(c as Client, name as string) {
-    return apiRun($c, SCRIPT_PATH + "/run",
-        {".id": requiredId($c, SCRIPT_PATH, $name, "script")});
+    return apiRun($c, SCRIPT_PATH + "/run", {".id": requiredId($c, SCRIPT_PATH, $name, "script")});
 }
 
 /**

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - interface lists: named groups of interfaces (WAN/LAN/...).
 # Spliced into routeros.j via include - not a standalone module.
@@ -144,7 +145,8 @@ export func removeFromInterfaceList(c as Client, listName as string, interfaceNa
     def rows as list of map of string to string init getAll($c, INTERFACE_LIST_MEMBER_PATH);
     def row as map of string to string init memberRow($rows, $listName, $interfaceName);
     if (len($row) == 0) {
-        raiseError("\"" + $interfaceName + "\" is not a member of the interface list \"" + $listName + "\"");
+        raiseError("\"" + $interfaceName + "\" is not a member of the interface list \"" +
+            $listName + "\"");
     }
     remove($c, INTERFACE_LIST_MEMBER_PATH, rowValue($row, ".id"));
 }
@@ -158,7 +160,10 @@ export func removeFromInterfaceList(c as Client, listName as string, interfaceNa
  * @return {map of string to string} the matching row, or an empty map
  * @internal
  */
-func memberRow(rows as list of map of string to string, listName as string, interfaceName as string) {
+func memberRow(
+    rows as list of map of string to string,
+    listName as string,
+    interfaceName as string) {
     for (def row in $rows) {
         if (rowValue($row, "list") == $listName and rowValue($row, "interface") == $interfaceName) {
             return $row;

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - WireGuard VPN tunnels (RouterOS v7).
 # Spliced into routeros.j via include - not a standalone module.
@@ -114,10 +115,7 @@ export func addWireguard(c as Client, name as string, listenPort as int) {
     if ($existing != "") {
         return $existing;
     }
-    return add($c, WIREGUARD_PATH, {
-        "name": $name,
-        "listen-port": convert.toString($listenPort)
-    });
+    return add($c, WIREGUARD_PATH, {"name": $name, "listen-port": convert.toString($listenPort)});
 }
 
 /**
@@ -134,7 +132,8 @@ export func addWireguard(c as Client, name as string, listenPort as int) {
 export func wireguardPublicKey(c as Client, name as string) {
     def row as map of string to string init findByName($c, WIREGUARD_PATH, $name);
     if (len($row) == 0) {
-        raiseError("no WireGuard interface named \"" + $name + "\" was found - create one with addWireguard");
+        raiseError("no WireGuard interface named \"" + $name +
+            "\" was found - create one with addWireguard");
     }
     return rowValue($row, "public-key");
 }
@@ -161,7 +160,11 @@ export func wireguardPublicKey(c as Client, name as string) {
  *   io.printf("server key: %s\n", mt.wireguardPublicKey($c, "wgvpn"));
  *   mt.addWireguardPeer($c, "wgvpn", $laptopKey, "10.100.0.2/32", "laptop");
  */
-export func setupWireguardServer(c as Client, name as string, listenPort as int, address as string) {
+export func setupWireguardServer(
+    c as Client,
+    name as string,
+    listenPort as int,
+    address as string) {
     ensureCidr($address);
     def id as string init addWireguard($c, $name, $listenPort);
     def rows as list of map of string to string init getAll($c, IP_ADDRESS_PATH);
@@ -219,7 +222,12 @@ export func wireguardPeers(c as Client) {
  * @throws {Error} kind "routeros" on a bad key or address, or an
  *                 unknown interface
  */
-export func addWireguardPeer(c as Client, interfaceName as string, publicKey as string, allowedAddress as string, comment as string) {
+export func addWireguardPeer(
+    c as Client,
+    interfaceName as string,
+    publicKey as string,
+    allowedAddress as string,
+    comment as string) {
     requiredId($c, WIREGUARD_PATH, $interfaceName, "WireGuard interface");
     ensureWireguardKey($publicKey);
     def allowed as string init normalizedAllowedAddress($allowedAddress);
@@ -258,7 +266,14 @@ export func addWireguardPeer(c as Client, interfaceName as string, publicKey as 
  *       "10.100.0.0/24", "to home network");
  *   mt.addIpAddress($c, "10.100.0.3/24", "wghome");
  */
-export func connectWireguard(c as Client, interfaceName as string, publicKey as string, endpointHost as string, endpointPort as int, allowedAddress as string, comment as string) {
+export func connectWireguard(
+    c as Client,
+    interfaceName as string,
+    publicKey as string,
+    endpointHost as string,
+    endpointPort as int,
+    allowedAddress as string,
+    comment as string) {
     requiredId($c, WIREGUARD_PATH, $interfaceName, "WireGuard interface");
     ensureWireguardKey($publicKey);
     def host as string init strings.trim($endpointHost);
@@ -314,7 +329,10 @@ export func removeWireguard(c as Client, name as string) {
         remove($c, IP_ADDRESS_PATH, rowValue($addrRow, ".id"));
     }
     def fwRows as list of map of string to string init getAll($c, FIREWALL_PATH);
-    def fwRow as map of string to string init findRowByField($fwRows, "comment", "wireguard: " + $name);
+    def fwRow as map of string to string init findRowByField(
+        $fwRows,
+        "comment",
+        "wireguard: " + $name);
     if (len($fwRow) > 0) {
         remove($c, FIREWALL_PATH, rowValue($fwRow, ".id"));
     }
@@ -353,12 +371,14 @@ export func disableWireguard(c as Client, name as string) {
 func ensureWireguardKey(key as string) {
     def k as string init strings.trim($key);
     if (len($k) != 44 or not strings.endsWith($k, "=")) {
-        raiseError("\"" + $key + "\" is not a WireGuard key - expected 44 base64 characters ending in \"=\"");
+        raiseError("\"" + $key +
+            "\" is not a WireGuard key - expected 44 base64 characters ending in \"=\"");
     }
     def chars as list of string init strings.chars($k);
     for (def ch in $chars) {
         if (not strings.contains(KEY_CHARS, $ch)) {
-            raiseError("\"" + $key + "\" is not a WireGuard key - it contains characters outside base64");
+            raiseError("\"" + $key +
+                "\" is not a WireGuard key - it contains characters outside base64");
         }
     }
 }
@@ -384,7 +404,8 @@ func normalizedAllowedAddress(csv as string) {
             raiseError("the allowed-address list \"" + $csv + "\" must not contain empty entries");
         }
         if (not strings.contains($p, "/")) {
-            raiseError("\"" + $p + "\" is missing the prefix length - a single device is \"" + $p + "/32\"");
+            raiseError("\"" + $p + "\" is missing the prefix length - a single device is \"" + $p +
+                "/32\"");
         }
         ensureCidr($p);
         $out[] = $p;

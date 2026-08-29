@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - hotspot: a captive guest portal.
 # Spliced into routeros.j via include - not a standalone module.
@@ -133,7 +134,14 @@ export func hotspotServers(c as Client) {
  *       "10.5.50.1", "10.5.50.10", "10.5.50.254");
  *   mt.addHotspotVoucher($c, "visitor", "day pass 123", "1d", "front desk");
  */
-export func setupHotspot(c as Client, name as string, interfaceName as string, network as string, gateway as string, rangeFrom as string, rangeTo as string) {
+export func setupHotspot(
+    c as Client,
+    name as string,
+    interfaceName as string,
+    network as string,
+    gateway as string,
+    rangeFrom as string,
+    rangeTo as string) {
     ensureName($name, "hotspot");
     def existing as string init idByName($c, HOTSPOT_PATH, $name);
     if ($existing != "") {
@@ -143,12 +151,10 @@ export func setupHotspot(c as Client, name as string, interfaceName as string, n
     if (idByName($c, HOTSPOT_PROFILE_PATH, $name) == "") {
         add($c, HOTSPOT_PROFILE_PATH, {"name": $name, "hotspot-address": $gateway});
     }
-    return add($c, HOTSPOT_PATH, {
-        "name": $name,
-        "interface": $interfaceName,
-        "address-pool": $name,
-        "profile": $name
-    });
+    return add(
+        $c,
+        HOTSPOT_PATH,
+        {"name": $name, "interface": $interfaceName, "address-pool": $name, "profile": $name});
 }
 
 /**
@@ -178,7 +184,10 @@ export func teardownHotspot(c as Client, name as string, network as string) {
     try {
         teardownDhcp($c, $name, $network);
         $found = $found + 1;
-    } catch (e) {
+    } catch (e) { # lint-disable: L103
+        # Deliberate: the DHCP half may already be gone, or never have been
+        # set up. That is not a failure to remove the hotspot - $found simply
+        # does not count it, and an entirely absent hotspot still raises below.
     }
     if ($found == 0) {
         raiseError("no hotspot named \"" + $name + "\" was found");
@@ -229,7 +238,12 @@ export func addHotspotUser(c as Client, name as string, password as string, comm
  * @return {string} the RouterOS id of the user
  * @throws {Error} kind "routeros" on bad input or an existing login
  */
-export func addHotspotVoucher(c as Client, name as string, password as string, uptimeLimit as string, comment as string) {
+export func addHotspotVoucher(
+    c as Client,
+    name as string,
+    password as string,
+    uptimeLimit as string,
+    comment as string) {
     def limit as string init strings.trim($uptimeLimit);
     ensureSchedulerInterval($limit);
     return hotspotUserAdd($c, $name, $password, $limit, $comment);
@@ -314,7 +328,10 @@ export func bypassHotspotMac(c as Client, mac as string, comment as string) {
 export func removeHotspotBypass(c as Client, mac as string) {
     ensureMac($mac);
     def rows as list of map of string to string init getAll($c, HOTSPOT_BINDING_PATH);
-    def row as map of string to string init findRowByField($rows, "mac-address", strings.upper($mac));
+    def row as map of string to string init findRowByField(
+        $rows,
+        "mac-address",
+        strings.upper($mac));
     if (len($row) == 0) {
         raiseError("no hotspot bypass for MAC \"" + $mac + "\" was found");
     }
@@ -357,7 +374,10 @@ export func allowBeforeLogin(c as Client, dstHost as string, comment as string) 
  */
 export func removeWalledGardenEntry(c as Client, dstHost as string) {
     def rows as list of map of string to string init getAll($c, WALLED_GARDEN_PATH);
-    def row as map of string to string init findRowByField($rows, "dst-host", strings.trim($dstHost));
+    def row as map of string to string init findRowByField(
+        $rows,
+        "dst-host",
+        strings.trim($dstHost));
     if (len($row) == 0) {
         raiseError("no walled-garden entry for \"" + $dstHost + "\" was found");
     }
@@ -376,7 +396,12 @@ export func removeWalledGardenEntry(c as Client, dstHost as string) {
  * @throws {Error} kind "routeros" on bad input or an existing login
  * @internal
  */
-func hotspotUserAdd(c as Client, name as string, password as string, limit as string, comment as string) {
+func hotspotUserAdd(
+    c as Client,
+    name as string,
+    password as string,
+    limit as string,
+    comment as string) {
     ensureName($name, "hotspot user");
     if (strings.trim($password) == "") {
         raiseError("the hotspot user password must not be empty");

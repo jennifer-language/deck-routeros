@@ -13,14 +13,14 @@ CAPsMANv2 `/interface/wifi/capsman`, `/interface/wifi/cap`
 Configuring ten access points by hand is ten chances to fumble a
 password. CAPsMAN makes one router the *controller* (CAPsMAN) and turns
 the APs into *CAPs* that download their SSID, security, and channel plan
-from it — change the WiFi password once, every AP updates, and clients
+from it - change the WiFi password once, every AP updates, and clients
 roam between them seamlessly.
 
 RouterOS has **two incompatible generations**:
 
-- **legacy** `/caps-man` — for classic-wireless hardware
+- **legacy** `/caps-man` - for classic-wireless hardware
   ([wireless.md](wireless.md));
-- **CAPsMANv2** under `/interface/wifi` — for wifiwave2/ax hardware
+- **CAPsMANv2** under `/interface/wifi` - for wifiwave2/ax hardware
   ([wifi.md](wifi.md)).
 
 This topic reports and toggles whichever the router has; `version` on
@@ -58,7 +58,7 @@ for (def ap in $aps) { io.printf("%s at %s: %s\n", $ap.identity, $ap.address, $a
 
 Enabling the manager is only step one. The *configuration* (SSID,
 security, datapath/bridge) and the *provisioning* rules (which config a
-joining AP receives) are where a CAPsMAN setup lives — and their shape
+joining AP receives) are where a CAPsMAN setup lives - and their shape
 differs sharply between the two generations
 (`/caps-man/configuration` + `/caps-man/provisioning` vs.
 `/interface/wifi/configuration` + `/interface/wifi/provisioning`). This
@@ -69,15 +69,15 @@ enabled with `/interface/wifi/cap set enabled=yes` (v2) or the classic
 
 ## Pitfalls
 
-- **Know your generation first** — `capsmanStatus(c).version` tells you.
+- **Know your generation first** - `capsmanStatus(c).version` tells you.
   Mixing v1 config on v2 hardware (or vice versa) simply does nothing.
 - **The controller needs a reachable, stable address** the CAPs find
-  (CAPsMAN discovery, or a configured address) — usually on the
+  (CAPsMAN discovery, or a configured address) - usually on the
   management VLAN.
 - Enabling the manager without a configuration + provisioning rule
   leaves joining APs unprovisioned (they register but broadcast
   nothing).
-- A CAP under management ignores its local WiFi settings — configure the
+- A CAP under management ignores its local WiFi settings - configure the
   controller, not the AP.
 
 ## Related

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the ethernet topic.
 # Spliced into routeros_test.j via include - run with:
@@ -66,10 +67,7 @@ func testLinkStatusFromRowUp() {
 }
 
 func testLinkStatusFromRowDown() {
-    def row as map of string to string init {
-        "name": "ether5",
-        "status": "no-link"
-    };
+    def row as map of string to string init {"name": "ether5", "status": "no-link"};
     def ls as LinkStatus init linkStatusFromRow($row);
     testing.assertFalse($ls.up);
     testing.assertEqual($ls.status, "no-link");

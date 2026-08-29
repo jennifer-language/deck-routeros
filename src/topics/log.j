@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - the router log: reading entries, routing what gets logged.
 # Spliced into routeros.j via include - not a standalone module.
@@ -204,7 +205,10 @@ export func setupRemoteLogging(c as Client, address as string, port as int, topi
     ensureIpAddress($address);
     ensurePort($port);
     def actionId as string init requiredId($c, LOGGING_ACTION_PATH, "remote", "logging action");
-    set($c, LOGGING_ACTION_PATH, $actionId,
+    set(
+        $c,
+        LOGGING_ACTION_PATH,
+        $actionId,
         {"remote": strings.trim($address), "remote-port": convert.toString($port)});
     return addLoggingRule($c, $topics, "remote");
 }
@@ -273,7 +277,8 @@ func normalizedLogTopics(csv as string) {
             raiseError("the topics list \"" + $csv + "\" must not contain empty entries");
         }
         if (strings.contains($p, " ")) {
-            raiseError("the topic \"" + $p + "\" must be a single word (e.g. \"firewall\", \"info\", \"!dns\")");
+            raiseError("the topic \"" + $p +
+                "\" must be a single word (e.g. \"firewall\", \"info\", \"!dns\")");
         }
         $out[] = $p;
     }

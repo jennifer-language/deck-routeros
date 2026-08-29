@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the addresslist topic.
 # Spliced into routeros_test.j via include - run with:
@@ -35,8 +36,7 @@ func testFindAddressListRowMatchesListAndAddress() {
         {".id": "*2", "list": "vpnusers", "address": "203.0.113.7"},
         {".id": "*3", "list": "blocklist", "address": "198.51.100.1"}
     ];
-    def row as map of string to string init
-        findAddressListRow($rows, "blocklist", "198.51.100.1");
+    def row as map of string to string init findAddressListRow($rows, "blocklist", "198.51.100.1");
     testing.assertEqual(rowValue($row, ".id"), "*3");
 }
 
@@ -44,8 +44,7 @@ func testFindAddressListRowMissesWrongList() {
     def rows as list of map of string to string init [
         {".id": "*1", "list": "vpnusers", "address": "203.0.113.7"}
     ];
-    def row as map of string to string init
-        findAddressListRow($rows, "blocklist", "203.0.113.7");
+    def row as map of string to string init findAddressListRow($rows, "blocklist", "203.0.113.7");
     testing.assertEqual(len($row), 0);
 }
 

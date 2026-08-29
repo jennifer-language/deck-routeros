@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * cloud example - MikroTik Cloud DDNS.
@@ -27,8 +28,11 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def cloud as mt.CloudStatus init mt.cloudStatus($c);
-if ($cloud.ddnsEnabled) { io.printf("cloud ddns: %s -> %s\n", $cloud.dnsName, $cloud.publicAddress); }
-else { io.printf("cloud ddns is off\n"); }
+if ($cloud.ddnsEnabled) {
+    io.printf("cloud ddns: %s -> %s\n", $cloud.dnsName, $cloud.publicAddress);
+} else {
+    io.printf("cloud ddns is off\n");
+}
 
 #   mt.enableCloudDns($c);
 #   io.printf("dial this: %s\n", mt.routerDnsName($c));

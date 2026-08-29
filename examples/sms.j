@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * sms example - text messages over the cellular modem.
@@ -28,8 +29,7 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def s as mt.SmsSettings init mt.smsSettings($c);
-io.printf("sms receive=%t port=%s keepMax=%d\n",
-    $s.receiveEnabled, $s.port, $s.keepMaxSms);
+io.printf("sms receive=%t port=%s keepMax=%d\n", $s.receiveEnabled, $s.port, $s.keepMaxSms);
 if ($s.allowedNumber == "") {
     io.printf("  allowed-number is unset - any sender is honoured\n");
 } else {
@@ -43,7 +43,9 @@ for (def m in $inbox) {
 }
 
 # The modem ports available to receive/send on:
-for (def l in mt.lteInterfaces($c)) { io.printf("modem port: %s\n", $l.name); }
+for (def l in mt.lteInterfaces($c)) {
+    io.printf("modem port: %s\n", $l.name);
+}
 
 # Start receiving, and restrict which sender the router will act on
 # (RouterOS can run commands sent by SMS):

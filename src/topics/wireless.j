@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - WiFi: radios, security profiles, clients.
 # Spliced into routeros.j via include - not a standalone module.
@@ -110,17 +111,20 @@ export func wirelessInterfaces(c as Client) {
  * @example
  *   mt.setupWifiAccessPoint($c, "wlan1", "My Home WiFi", "correct horse battery");
  */
-export func setupWifiAccessPoint(c as Client, interfaceName as string, ssid as string, password as string) {
+export func setupWifiAccessPoint(
+    c as Client,
+    interfaceName as string,
+    ssid as string,
+    password as string) {
     ensureSsid($ssid);
     ensureWifiPassword($password);
     def id as string init requiredId($c, WIRELESS_PATH, $interfaceName, "wireless interface");
     def profile as string init ensureWifiProfile($c, wifiProfileName($interfaceName), $password);
-    set($c, WIRELESS_PATH, $id, {
-        "ssid": $ssid,
-        "security-profile": $profile,
-        "mode": "ap-bridge",
-        "disabled": "no"
-    });
+    set(
+        $c,
+        WIRELESS_PATH,
+        $id,
+        {"ssid": $ssid, "security-profile": $profile, "mode": "ap-bridge", "disabled": "no"});
 }
 
 /**
@@ -133,7 +137,11 @@ export func setupWifiAccessPoint(c as Client, interfaceName as string, ssid as s
  */
 export func setWifiSsid(c as Client, interfaceName as string, ssid as string) {
     ensureSsid($ssid);
-    set($c, WIRELESS_PATH, requiredId($c, WIRELESS_PATH, $interfaceName, "wireless interface"), {"ssid": $ssid});
+    set(
+        $c,
+        WIRELESS_PATH,
+        requiredId($c, WIRELESS_PATH, $interfaceName, "wireless interface"),
+        {"ssid": $ssid});
 }
 
 /**
@@ -157,7 +165,10 @@ export func setWifiPassword(c as Client, interfaceName as string, password as st
     }
     def profile as string init rowValue($row, "security-profile");
     if ($profile == "" or $profile == "default") {
-        def dedicated as string init ensureWifiProfile($c, wifiProfileName($interfaceName), $password);
+        def dedicated as string init ensureWifiProfile(
+            $c,
+            wifiProfileName($interfaceName),
+            $password);
         set($c, WIRELESS_PATH, rowValue($row, ".id"), {"security-profile": $dedicated});
     } else {
         ensureWifiProfile($c, $profile, $password);
@@ -179,20 +190,28 @@ export func setWifiPassword(c as Client, interfaceName as string, password as st
  * @return {string} the RouterOS id of the new virtual AP
  * @throws {Error} kind "routeros" on bad input or an unknown master radio
  */
-export func addVirtualAp(c as Client, masterInterface as string, name as string, ssid as string, password as string) {
+export func addVirtualAp(
+    c as Client,
+    masterInterface as string,
+    name as string,
+    ssid as string,
+    password as string) {
     ensureName($name, "interface");
     ensureSsid($ssid);
     ensureWifiPassword($password);
     requiredId($c, WIRELESS_PATH, $masterInterface, "wireless interface");
     def profile as string init ensureWifiProfile($c, wifiProfileName($name), $password);
-    return add($c, WIRELESS_PATH, {
-        "name": $name,
-        "master-interface": $masterInterface,
-        "ssid": $ssid,
-        "security-profile": $profile,
-        "mode": "ap-bridge",
-        "disabled": "no"
-    });
+    return add(
+        $c,
+        WIRELESS_PATH,
+        {
+            "name": $name,
+            "master-interface": $masterInterface,
+            "ssid": $ssid,
+            "security-profile": $profile,
+            "mode": "ap-bridge",
+            "disabled": "no"
+        });
 }
 
 /**

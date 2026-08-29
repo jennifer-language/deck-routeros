@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - bridges and bridge ports.
 # Spliced into routeros.j via include - not a standalone module.
@@ -275,7 +276,12 @@ export func disableVlanFiltering(c as Client, bridge as string) {
  * @return {string} the RouterOS id of the (new or existing) entry
  * @throws {Error} kind "routeros" on a bad id or unknown bridge
  */
-export func addBridgeVlan(c as Client, bridge as string, vlanId as int, tagged as string, untagged as string) {
+export func addBridgeVlan(
+    c as Client,
+    bridge as string,
+    vlanId as int,
+    tagged as string,
+    untagged as string) {
     requiredId($c, BRIDGE_PATH, $bridge, "bridge");
     ensureVlanId($vlanId);
     def vid as string init convert.toString($vlanId);
@@ -326,7 +332,10 @@ export func setPortPvid(c as Client, bridge as string, port as string, pvid as i
  */
 export func removeBridgeVlan(c as Client, bridge as string, vlanId as int) {
     def rows as list of map of string to string init getAll($c, BRIDGE_VLAN_PATH);
-    def row as map of string to string init findBridgeVlanRow($rows, $bridge, convert.toString($vlanId));
+    def row as map of string to string init findBridgeVlanRow(
+        $rows,
+        $bridge,
+        convert.toString($vlanId));
     if (len($row) == 0) {
         raiseError("the bridge \"" + $bridge + "\" has no VLAN " + convert.toString($vlanId));
     }

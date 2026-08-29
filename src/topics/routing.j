@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - static routes.
 # Spliced into routeros.j via include - not a standalone module.
@@ -128,7 +129,12 @@ export func addRoute(c as Client, dstAddress as string, gateway as string, comme
  * @throws {Error} kind "routeros" on a malformed destination, gateway,
  *                 or a distance outside 1-255
  */
-export func addRouteWithDistance(c as Client, dstAddress as string, gateway as string, distance as int, comment as string) {
+export func addRouteWithDistance(
+    c as Client,
+    dstAddress as string,
+    gateway as string,
+    distance as int,
+    comment as string) {
     ensureDistance($distance);
     return routeAdd($c, $dstAddress, $gateway, $distance, $comment);
 }
@@ -218,7 +224,12 @@ func ensureDistance(distance as int) {
  * @throws {Error} kind "routeros" on a malformed destination or gateway
  * @internal
  */
-func routeAdd(c as Client, dstAddress as string, gateway as string, distance as int, comment as string) {
+func routeAdd(
+    c as Client,
+    dstAddress as string,
+    gateway as string,
+    distance as int,
+    comment as string) {
     ensureCidr($dstAddress);
     def gw as string init strings.trim($gateway);
     if ($gw == "") {
@@ -350,7 +361,11 @@ export func useRoutingTable(c as Client, srcAddress as string, table as string, 
  * @return {string} the RouterOS id of the (new or existing) rule
  * @throws {Error} kind "routeros" on a bad address or table name
  */
-export func useRoutingTableOnly(c as Client, srcAddress as string, table as string, comment as string) {
+export func useRoutingTableOnly(
+    c as Client,
+    srcAddress as string,
+    table as string,
+    comment as string) {
     return routingRuleAdd($c, $srcAddress, $table, "lookup-only-in-table", $comment);
 }
 
@@ -364,8 +379,10 @@ export func useRoutingTableOnly(c as Client, srcAddress as string, table as stri
  */
 export func removeRoutingRule(c as Client, srcAddress as string, table as string) {
     def rows as list of map of string to string init getAll($c, ROUTING_RULE_PATH);
-    def row as map of string to string init
-        findRoutingRuleRow($rows, strings.trim($srcAddress), $table);
+    def row as map of string to string init findRoutingRuleRow(
+        $rows,
+        strings.trim($srcAddress),
+        $table);
     if (len($row) == 0) {
         raiseError("no routing rule sends \"" + $srcAddress + "\" to table \"" + $table + "\"");
     }
@@ -384,7 +401,12 @@ export func removeRoutingRule(c as Client, srcAddress as string, table as string
  * @throws {Error} kind "routeros" on a bad address or table name
  * @internal
  */
-func routingRuleAdd(c as Client, srcAddress as string, table as string, action as string, comment as string) {
+func routingRuleAdd(
+    c as Client,
+    srcAddress as string,
+    table as string,
+    action as string,
+    comment as string) {
     def src as string init strings.trim($srcAddress);
     if (strings.contains($src, "/")) {
         ensureCidr($src);
@@ -398,8 +420,11 @@ func routingRuleAdd(c as Client, srcAddress as string, table as string, action a
     if (len($existing) > 0) {
         return rowValue($existing, ".id");
     }
-    def attrs as map of string to string init
-        {"src-address": $src, "action": $action, "table": $table};
+    def attrs as map of string to string init {
+        "src-address": $src,
+        "action": $action,
+        "table": $table
+    };
     if ($comment != "") {
         $attrs["comment"] = $comment;
     }

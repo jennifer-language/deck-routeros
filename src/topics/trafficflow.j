@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - traffic flow: export NetFlow / IPFIX to a collector.
 # Spliced into routeros.j via include - not a standalone module.
@@ -109,7 +110,8 @@ export func addFlowTarget(c as Client, address as string, port as int, version a
     ensureIpAddress($collector);
     ensurePort($port);
     if (not lists.contains(FLOW_VERSIONS, $version)) {
-        raiseError("unknown NetFlow version \"" + $version + "\" - use one of: " + strings.join(FLOW_VERSIONS, ", "));
+        raiseError("unknown NetFlow version \"" + $version + "\" - use one of: " +
+            strings.join(FLOW_VERSIONS, ", "));
     }
     def portStr as string init convert.toString($port);
     def rows as list of map of string to string init getAll($c, TRAFFIC_FLOW_TARGET_PATH);
@@ -118,7 +120,9 @@ export func addFlowTarget(c as Client, address as string, port as int, version a
             return rowValue($row, ".id");
         }
     }
-    return add($c, TRAFFIC_FLOW_TARGET_PATH,
+    return add(
+        $c,
+        TRAFFIC_FLOW_TARGET_PATH,
         {"address": $collector, "port": $portStr, "version": $version});
 }
 
@@ -131,7 +135,10 @@ export func addFlowTarget(c as Client, address as string, port as int, version a
  */
 export func removeFlowTarget(c as Client, address as string) {
     def rows as list of map of string to string init getAll($c, TRAFFIC_FLOW_TARGET_PATH);
-    def row as map of string to string init findRowByField($rows, "address", strings.trim($address));
+    def row as map of string to string init findRowByField(
+        $rows,
+        "address",
+        strings.trim($address));
     if (len($row) == 0) {
         raiseError("no traffic-flow target at \"" + $address + "\" was found");
     }

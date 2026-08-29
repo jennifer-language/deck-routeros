@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - EoIP tunnels: a layer-2 wire between two MikroTiks.
 # Spliced into routeros.j via include - not a standalone module.
@@ -113,7 +114,12 @@ export func addEoipTunnel(c as Client, name as string, remoteAddress as string, 
  * @return {string} the RouterOS id of the new tunnel
  * @throws {Error} kind "routeros" on bad input or an empty secret
  */
-export func addSecureEoipTunnel(c as Client, name as string, remoteAddress as string, tunnelId as int, ipsecSecret as string) {
+export func addSecureEoipTunnel(
+    c as Client,
+    name as string,
+    remoteAddress as string,
+    tunnelId as int,
+    ipsecSecret as string) {
     if (strings.trim($ipsecSecret) == "") {
         raiseError("the IPsec secret must not be empty - it is the only thing protecting the tunnel");
     }
@@ -169,7 +175,12 @@ export func disableEoipTunnel(c as Client, name as string) {
  * @throws {Error} kind "routeros" on bad input or a clashing tunnel
  * @internal
  */
-func eoipAdd(c as Client, name as string, remoteAddress as string, tunnelId as int, secret as string) {
+func eoipAdd(
+    c as Client,
+    name as string,
+    remoteAddress as string,
+    tunnelId as int,
+    secret as string) {
     ensureName($name, "EoIP tunnel");
     def remote as string init strings.trim($remoteAddress);
     ensureIpAddress($remote);
@@ -180,8 +191,8 @@ func eoipAdd(c as Client, name as string, remoteAddress as string, tunnelId as i
     def rows as list of map of string to string init getAll($c, EOIP_PATH);
     def clash as map of string to string init findEoipRow($rows, $remote, $tunnelId);
     if (len($clash) > 0) {
-        raiseError("tunnel id " + convert.toString($tunnelId) + " to " + $remote
-            + " is already used by \"" + rowValue($clash, "name") + "\"");
+        raiseError("tunnel id " + convert.toString($tunnelId) + " to " + $remote +
+            " is already used by \"" + rowValue($clash, "name") + "\"");
     }
     def attrs as map of string to string init {
         "name": $name,

@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * certificates example - TLS certificates for the router's services.
@@ -28,8 +29,12 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def certs as list of mt.Certificate init mt.certificates($c);
 for (def cert in $certs) {
-    io.printf("cert %s (%s) expires %s key=%t\n",
-        $cert.name, $cert.commonName, $cert.expiresAfter, $cert.hasPrivateKey);
+    io.printf(
+        "cert %s (%s) expires %s key=%t\n",
+        $cert.name,
+        $cert.commonName,
+        $cert.expiresAfter,
+        $cert.hasPrivateKey);
 }
 def soon as list of mt.Certificate init mt.expiringCertificates($c, 30);
 io.printf("%d certificates expire within 30 days\n", len($soon));

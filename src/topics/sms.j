@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - SMS over the cellular modem: settings, sending, the inbox.
 # Spliced into routeros.j via include - not a standalone module.
@@ -80,8 +81,7 @@ export func smsSettings(c as Client) {
  */
 export func enableSmsReceive(c as Client, port as string) {
     ensureName($port, "SMS port");
-    apiRun($c, SMS_PATH + "/set",
-        {"receive-enabled": "yes", "port": strings.trim($port)});
+    apiRun($c, SMS_PATH + "/set", {"receive-enabled": "yes", "port": strings.trim($port)});
 }
 
 /**
@@ -121,7 +121,9 @@ export func restrictSms(c as Client, allowedNumber as string, keepMaxSms as int)
     if ($number != "") {
         ensurePhoneNumber($number);
     }
-    apiRun($c, SMS_PATH + "/set",
+    apiRun(
+        $c,
+        SMS_PATH + "/set",
         {"allowed-number": $number, "keep-max-sms": convert.toString($keepMaxSms)});
 }
 
@@ -148,7 +150,9 @@ export func sendSms(c as Client, port as string, phoneNumber as string, message 
     if ($message == "") {
         raiseError("the message must not be empty");
     }
-    apiRun($c, SMS_SEND_COMMAND,
+    apiRun(
+        $c,
+        SMS_SEND_COMMAND,
         {"port": strings.trim($port), "phone-number": $number, "message": $message});
 }
 

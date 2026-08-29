@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - the ARP table: which IP belongs to which MAC.
 # Spliced into routeros.j via include - not a standalone module.
@@ -132,14 +133,13 @@ export func addStaticArp(c as Client, address as string, mac as string, interfac
     def rows as list of map of string to string init getAll($c, ARP_PATH);
     def existing as map of string to string init findStaticArpRow($rows, $target, $interfaceName);
     if (len($existing) > 0) {
-        raiseError("a static ARP entry for " + $target + " on \"" + $interfaceName
-            + "\" already exists - remove it first (removeArpEntry)");
+        raiseError("a static ARP entry for " + $target + " on \"" + $interfaceName +
+            "\" already exists - remove it first (removeArpEntry)");
     }
-    return add($c, ARP_PATH, {
-        "address": $target,
-        "mac-address": strings.upper($mac),
-        "interface": $interfaceName
-    });
+    return add(
+        $c,
+        ARP_PATH,
+        {"address": $target, "mac-address": strings.upper($mac), "interface": $interfaceName});
 }
 
 /**
@@ -214,11 +214,13 @@ func addressesForMacRows(rows as list of map of string to string, mac as string)
  * @return {map of string to string} the matching row, or an empty map
  * @internal
  */
-func findStaticArpRow(rows as list of map of string to string, address as string, interfaceName as string) {
+func findStaticArpRow(
+    rows as list of map of string to string,
+    address as string,
+    interfaceName as string) {
     for (def row in $rows) {
-        if (rowValue($row, "address") == $address
-                and rowValue($row, "interface") == $interfaceName
-                and not rowBool($row, "dynamic")) {
+        if (rowValue($row, "address") == $address and
+            rowValue($row, "interface") == $interfaceName and not rowBool($row, "dynamic")) {
             return $row;
         }
     }

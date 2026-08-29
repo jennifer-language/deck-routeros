@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * bridges example - bridges and bridge ports (virtual switches).
@@ -30,7 +31,9 @@ def brs as list of mt.Bridge init mt.bridges($c);
 for (def b in $brs) {
     io.printf("bridge %s running=%t\n", $b.name, $b.running);
     def ports as list of mt.BridgePort init mt.bridgePorts($c, $b.name);
-    for (def p in $ports) { io.printf("  port: %s\n", $p.interfaceName); }
+    for (def p in $ports) {
+        io.printf("  port: %s\n", $p.interfaceName);
+    }
 }
 
 #   mt.addBridge($c, "brlan");

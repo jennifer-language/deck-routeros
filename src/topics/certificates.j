@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - certificates: TLS for the router's own services.
 # Spliced into routeros.j via include - not a standalone module.
@@ -104,12 +105,15 @@ export func generateSelfSigned(c as Client, name as string, commonName as string
     if (idByName($c, CERTIFICATE_PATH, $name) != "") {
         raiseError("the certificate \"" + $name + "\" already exists");
     }
-    def id as string init add($c, CERTIFICATE_PATH, {
-        "name": $name,
-        "common-name": $commonName,
-        "days-valid": convert.toString($days),
-        "key-usage": "digital-signature,key-encipherment,tls-server"
-    });
+    def id as string init add(
+        $c,
+        CERTIFICATE_PATH,
+        {
+            "name": $name,
+            "common-name": $commonName,
+            "days-valid": convert.toString($days),
+            "key-usage": "digital-signature,key-encipherment,tls-server"
+        });
     apiTalk($c, CERTIFICATE_PATH + "/sign", {".id": $id});
     return $id;
 }
@@ -154,9 +158,13 @@ export func importCertificatePem(c as Client, name as string, certPem as string,
     ensurePemKey($keyPem);
     writeFileText($c, $name + ".crt", $certPem);
     writeFileText($c, $name + ".key", $keyPem);
-    apiTalk($c, CERTIFICATE_PATH + "/import",
+    apiTalk(
+        $c,
+        CERTIFICATE_PATH + "/import",
         {"file-name": $name + ".crt", "passphrase": "", "name": $name});
-    apiTalk($c, CERTIFICATE_PATH + "/import",
+    apiTalk(
+        $c,
+        CERTIFICATE_PATH + "/import",
         {"file-name": $name + ".key", "passphrase": "", "name": $name});
     removeFile($c, $name + ".crt");
     removeFile($c, $name + ".key");
@@ -175,10 +183,14 @@ export func importCertificatePem(c as Client, name as string, certPem as string,
  */
 export func assignServiceCertificate(c as Client, serviceName as string, certName as string) {
     if (not lists.contains(SSL_SERVICES, $serviceName)) {
-        raiseError("\"" + $serviceName + "\" takes no certificate - use one of: " + strings.join(SSL_SERVICES, ", "));
+        raiseError("\"" + $serviceName + "\" takes no certificate - use one of: " +
+            strings.join(SSL_SERVICES, ", "));
     }
     requiredId($c, CERTIFICATE_PATH, $certName, "certificate");
-    set($c, SERVICE_PATH, requiredId($c, SERVICE_PATH, $serviceName, "service"),
+    set(
+        $c,
+        SERVICE_PATH,
+        requiredId($c, SERVICE_PATH, $serviceName, "service"),
         {"certificate": $certName});
 }
 

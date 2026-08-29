@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * disk example - storage devices (USB/NVMe/SATA).
@@ -27,11 +28,19 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def ds as list of mt.Disk init mt.disks($c);
-if (len($ds) == 0) { io.printf("no attached storage\n"); }
+if (len($ds) == 0) {
+    io.printf("no attached storage\n");
+}
 for (def d in $ds) {
     # name falls back to slot - RouterOS leaves "name" empty on USB storage
-    io.printf("disk %s (slot %s, %s) fs=%s size=%d free=%d\n",
-        $d.name, $d.slot, $d.model, $d.fs, $d.sizeBytes, $d.freeBytes);
+    io.printf(
+        "disk %s (slot %s, %s) fs=%s size=%d free=%d\n",
+        $d.name,
+        $d.slot,
+        $d.model,
+        $d.fs,
+        $d.sizeBytes,
+        $d.freeBytes);
 }
 
 # DESTRUCTIVE - erases the whole disk (not run in the demo):

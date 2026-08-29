@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - LTE / cellular: a mobile-broadband uplink.
 # Spliced into routeros.j via include - not a standalone module.
@@ -90,8 +91,10 @@ export func lteInterfaces(c as Client) {
  */
 export func lteStatus(c as Client, name as string) {
     requiredId($c, LTE_PATH, $name, "LTE interface");
-    def rows as list of map of string to string init apiTalk($c,
-        LTE_PATH + "/monitor", {"numbers": $name, "once": ""});
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        LTE_PATH + "/monitor",
+        {"numbers": $name, "once": ""});
     return lteStatusFromRow(mergeRows($rows));
 }
 

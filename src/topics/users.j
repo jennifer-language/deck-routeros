@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - router users: accounts, groups, sessions.
 # Spliced into routeros.j via include - not a standalone module.
@@ -143,7 +144,8 @@ export func addUser(c as Client, name as string, password as string, group as st
     ensureUserPassword($password);
     requiredId($c, USER_GROUP_PATH, $group, "user group");
     if (idByName($c, USER_PATH, $name) != "") {
-        raiseError("the user \"" + $name + "\" already exists - use setUserPassword or setUserGroup to change it");
+        raiseError("the user \"" + $name +
+            "\" already exists - use setUserPassword or setUserGroup to change it");
     }
     return add($c, USER_PATH, {"name": $name, "password": $password, "group": $group});
 }
@@ -255,7 +257,8 @@ export func disableUser(c as Client, name as string) {
  */
 func ensureNotSelf(loggedIn as string, name as string, action as string) {
     if ($loggedIn == $name) {
-        raiseError("refusing to " + $action + " \"" + $name + "\" - it is the account this session is logged in as");
+        raiseError("refusing to " + $action + " \"" + $name +
+            "\" - it is the account this session is logged in as");
     }
 }
 

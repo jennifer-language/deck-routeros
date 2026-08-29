@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - RADIUS: central authentication for logins, VPN, hotspot.
 # Spliced into routeros.j via include - not a standalone module.
@@ -8,7 +9,13 @@
 export def const RADIUS_PATH as string init "/radius";
 
 def const RADIUS_SERVICES as list of string init [
-    "login", "ppp", "hotspot", "wireless", "dhcp", "ipsec", "dot1x"
+    "login",
+    "ppp",
+    "hotspot",
+    "wireless",
+    "dhcp",
+    "ipsec",
+    "dot1x"
 ];
 
 /**
@@ -66,7 +73,12 @@ export func radiusServers(c as Client) {
  * @example
  *   mt.addRadiusServer($c, "10.0.9.20", "a shared secret", "login,ppp", "AD");
  */
-export func addRadiusServer(c as Client, address as string, secret as string, services as string, comment as string) {
+export func addRadiusServer(
+    c as Client,
+    address as string,
+    secret as string,
+    services as string,
+    comment as string) {
     def server as string init strings.trim($address);
     ensureIpAddress($server);
     if (strings.trim($secret) == "") {
@@ -78,8 +90,11 @@ export func addRadiusServer(c as Client, address as string, secret as string, se
     if (len($existing) > 0) {
         return rowValue($existing, ".id");
     }
-    def attrs as map of string to string init
-        {"address": $server, "secret": $secret, "service": $svc};
+    def attrs as map of string to string init {
+        "address": $server,
+        "secret": $secret,
+        "service": $svc
+    };
     if ($comment != "") {
         $attrs["comment"] = $comment;
     }
@@ -95,7 +110,10 @@ export func addRadiusServer(c as Client, address as string, secret as string, se
  */
 export func removeRadiusServer(c as Client, address as string) {
     def rows as list of map of string to string init getAll($c, RADIUS_PATH);
-    def row as map of string to string init findRowByField($rows, "address", strings.trim($address));
+    def row as map of string to string init findRowByField(
+        $rows,
+        "address",
+        strings.trim($address));
     if (len($row) == 0) {
         raiseError("no RADIUS server at \"" + $address + "\" was found");
     }
@@ -119,7 +137,8 @@ func normalizedRadiusServices(csv as string) {
             raiseError("the service list \"" + $csv + "\" must not contain empty entries");
         }
         if (not lists.contains(RADIUS_SERVICES, $p)) {
-            raiseError("unknown RADIUS service \"" + $p + "\" - use one of: " + strings.join(RADIUS_SERVICES, ", "));
+            raiseError("unknown RADIUS service \"" + $p + "\" - use one of: " +
+                strings.join(RADIUS_SERVICES, ", "));
         }
         $out[] = $p;
     }

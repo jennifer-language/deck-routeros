@@ -10,8 +10,8 @@ File: `src/topics/trafficflow.j`. Paths: `/ip/traffic-flow`
 ## Background
 
 Traffic flow exports a record for every connection the router sees to an
-external **collector** — ntopng, Elastiflow, SolarWinds, a commercial
-appliance — which turns them into bandwidth graphs, top-talker lists,
+external **collector** - ntopng, Elastiflow, SolarWinds, a commercial
+appliance - which turns them into bandwidth graphs, top-talker lists,
 and per-application breakdowns. It is the "where is my bandwidth going"
 tool, and unlike SNMP (which gives interface totals) it sees individual
 flows. Two steps: enable accounting, and point it at a collector.
@@ -48,15 +48,15 @@ for (def t in $ts) { io.printf("export v%s -> %s:%s\n", $t.version, $t.address, 
 
 ## Pitfalls
 
-- **Both steps are needed** — enabling accounting without a target
+- **Both steps are needed** - enabling accounting without a target
   measures into the void; a target without `enabled=yes` exports
   nothing.
-- **The collector must speak the version you pick** — match it to your
+- **The collector must speak the version you pick** - match it to your
   tool (most modern collectors prefer `ipfix` or NetFlow v9; v5 is the
   fallback).
-- **Overhead:** flow accounting adds per-connection work — negligible on
+- **Overhead:** flow accounting adds per-connection work - negligible on
   most boxes, noticeable on a small CPU under heavy connection churn.
-- Flow export is UDP and unencrypted — keep the collector on a trusted
+- Flow export is UDP and unencrypted - keep the collector on a trusted
   segment.
 
 ## Related

@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * sstp example - SSTP (TLS) remote-access VPN server and clients.
@@ -29,7 +30,9 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def s as mt.SstpServer init mt.sstpServerStatus($c);
 io.printf("sstp server enabled=%t port=%d cert=%s\n", $s.enabled, $s.port, $s.certificate);
 def clients as list of mt.SstpClient init mt.sstpClients($c);
-for (def cl in $clients) { io.printf("sstp client %s -> %s running=%t\n", $cl.name, $cl.connectTo, $cl.running); }
+for (def cl in $clients) {
+    io.printf("sstp client %s -> %s running=%t\n", $cl.name, $cl.connectTo, $cl.running);
+}
 
 #   mt.enableSstpServer($c, "router-le-cert", 443);
 #   mt.addVpnUser($c, "bob", "his password", "sstp", "remote worker");

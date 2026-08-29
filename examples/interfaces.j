@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * interfaces example - listing and managing interfaces.
@@ -28,8 +29,13 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def ifaces as list of mt.Interface init mt.interfaces($c);
 for (def i in $ifaces) {
-    io.printf("%s (%s) running=%t disabled=%t %s\n",
-        $i.name, $i.kind, $i.running, $i.disabled, $i.comment);
+    io.printf(
+        "%s (%s) running=%t disabled=%t %s\n",
+        $i.name,
+        $i.kind,
+        $i.running,
+        $i.disabled,
+        $i.comment);
 }
 
 #   mt.commentInterface($c, "ether1", "uplink to ISP");

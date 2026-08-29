@@ -7,12 +7,12 @@ File: `src/topics/neighbor.j`. Path: `/ip/neighbor` (`NEIGHBOR_PATH`).
 
 ## Background
 
-Network devices announce themselves on the wire — MikroTik with MNDP,
+Network devices announce themselves on the wire - MikroTik with MNDP,
 Cisco with CDP, most vendors with LLDP. The router collects those
 announcements from its directly-connected segments, so `/ip/neighbor`
 answers "what is plugged into this segment" without a scan: the switch
 on ether2, the AP on ether5, the router upstream. Only same-segment
-neighbors appear — nothing behind another router.
+neighbors appear - nothing behind another router.
 
 ## Struct
 
@@ -49,13 +49,13 @@ for (def n in $up) { io.printf("upstream: %s (%s)\n", $n.identity, $n.address); 
 ## Pitfalls
 
 - **Layer-2 only:** a neighbor with no `address` was heard at layer 2
-  but has no IP on this segment — normal, not an error.
+  but has no IP on this segment - normal, not an error.
 - **Discovery must be enabled** on the interface for the router to hear
-  (and be heard) — it is on by default, but a hardened config may
+  (and be heard) - it is on by default, but a hardened config may
   restrict `/ip/neighbor/discovery-settings` (generic verbs); on an
   untrusted/WAN interface, turning discovery *off* is good hygiene (it
   otherwise leaks your model and version).
-- Non-announcing devices (plain PCs, most servers) never appear —
+- Non-announcing devices (plain PCs, most servers) never appear -
   absence here doesn't mean nothing is connected. Pair with
   [arp.md](arp.md) for IP↔MAC presence.
 

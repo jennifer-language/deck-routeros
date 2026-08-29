@@ -9,7 +9,7 @@ File: `src/topics/contrack.j`. Paths:
 
 ## Background
 
-Connection tracking is the state behind stateful firewalling and NAT —
+Connection tracking is the state behind stateful firewalling and NAT -
 every flow the router has seen, with its addresses, protocol, and (for
 TCP) state. Reading it answers operational questions the config alone
 cannot: *what is this device actually talking to*, *is the table
@@ -60,15 +60,15 @@ io.printf("dropped %d connections\n", $n);
 
 ## Pitfalls
 
-- **The table is huge on a busy router** — `connections(c)` may return
+- **The table is huge on a busy router** - `connections(c)` may return
   thousands of rows. Prefer `connectionsFor`.
-- Dropping connections is not blocking — the host can immediately open
+- Dropping connections is not blocking - the host can immediately open
   new ones. To *keep* it out, add a firewall rule
   ([firewall.md](firewall.md)) or an address-list drop
   ([addresslist.md](addresslist.md)); drop the connections to make the
   block take effect on existing flows.
 - A near-full table (`totalEntries` approaching `maxEntries`) drops new
-  connections — a symptom of a scan, a P2P host, or a too-small table.
+  connections - a symptom of a scan, a P2P host, or a too-small table.
 - NAT'd flows appear in translated form; the same flow may show its
   original and NAT'd addresses.
 

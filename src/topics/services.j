@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - management services: the ways into the router.
 # Spliced into routeros.j via include - not a standalone module.
@@ -8,7 +9,14 @@
 export def const SERVICE_PATH as string init "/ip/service";
 
 def const KNOWN_SERVICES as list of string init [
-    "api", "api-ssl", "ftp", "ssh", "telnet", "winbox", "www", "www-ssl"
+    "api",
+    "api-ssl",
+    "ftp",
+    "ssh",
+    "telnet",
+    "winbox",
+    "www",
+    "www-ssl"
 ];
 
 /**
@@ -122,9 +130,13 @@ export func setServicePort(c as Client, name as string, port as int) {
     def rows as list of map of string to string init getAll($c, SERVICE_PATH);
     def owner as string init serviceUsingPort($rows, $port, $name);
     if ($owner != "") {
-        raiseError("port " + convert.toString($port) + " is already used by the service \"" + $owner + "\"");
+        raiseError("port " + convert.toString($port) + " is already used by the service \"" +
+            $owner + "\"");
     }
-    set($c, SERVICE_PATH, requiredId($c, SERVICE_PATH, $name, "service"),
+    set(
+        $c,
+        SERVICE_PATH,
+        requiredId($c, SERVICE_PATH, $name, "service"),
         {"port": convert.toString($port)});
 }
 
@@ -151,8 +163,7 @@ export func restrictService(c as Client, name as string, addresses as string) {
     if (strings.trim($addresses) != "") {
         $allowed = normalizedUserAddress($addresses);
     }
-    set($c, SERVICE_PATH, requiredId($c, SERVICE_PATH, $name, "service"),
-        {"address": $allowed});
+    set($c, SERVICE_PATH, requiredId($c, SERVICE_PATH, $name, "service"), {"address": $allowed});
 }
 
 /**
@@ -190,7 +201,8 @@ export func disableInsecureServices(c as Client) {
  */
 func ensureServiceName(name as string) {
     if (not lists.contains(KNOWN_SERVICES, $name)) {
-        raiseError("unknown service \"" + $name + "\" - use one of: " + strings.join(KNOWN_SERVICES, ", "));
+        raiseError("unknown service \"" + $name + "\" - use one of: " +
+            strings.join(KNOWN_SERVICES, ", "));
     }
 }
 

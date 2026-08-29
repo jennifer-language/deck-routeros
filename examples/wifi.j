@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * wifi example - modern WiFi (wifiwave2/ax, RouterOS v7).
@@ -27,12 +28,16 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def wifis as list of mt.WifiInterface init mt.wifiInterfaces($c);
-if (len($wifis) == 0) { io.printf("no wifiwave2 interfaces on this router\n"); }
+if (len($wifis) == 0) {
+    io.printf("no wifiwave2 interfaces on this router\n");
+}
 for (def w in $wifis) {
     io.printf("wifi %s: ssid \"%s\" (%s) running=%t\n", $w.name, $w.ssid, $w.band, $w.running);
 }
 def regs as list of mt.WifiRegistration init mt.wifiRegistrations($c);
-for (def r in $regs) { io.printf("client %s on %s, signal %s\n", $r.mac, $r.interfaceName, $r.signal); }
+for (def r in $regs) {
+    io.printf("client %s on %s, signal %s\n", $r.mac, $r.interfaceName, $r.signal);
+}
 
 #   mt.setupWifi($c, "wifi1", "My Home WiFi", "correct horse battery");
 #   mt.addVirtualWifi($c, "wifi1", "wifiguest", "Guest WiFi", "changeme123");

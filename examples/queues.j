@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * queues example - simple queues and hierarchical QoS.
@@ -28,12 +29,22 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def sq as list of mt.SimpleQueue init mt.simpleQueues($c);
 for (def q in $sq) {
-    io.printf("queue %s on %s: %s up / %s down\n", $q.name, $q.target, $q.maxUpload, $q.maxDownload);
+    io.printf(
+        "queue %s on %s: %s up / %s down\n",
+        $q.name,
+        $q.target,
+        $q.maxUpload,
+        $q.maxDownload);
 }
 def tq as list of mt.TreeQueue init mt.treeQueues($c);
 for (def t in $tq) {
-    io.printf("tree %s under %s: mark=%s max=%s prio=%d\n",
-        $t.name, $t.parent, $t.packetMark, $t.maxLimit, $t.priority);
+    io.printf(
+        "tree %s under %s: mark=%s max=%s prio=%d\n",
+        $t.name,
+        $t.parent,
+        $t.packetMark,
+        $t.maxLimit,
+        $t.priority);
 }
 
 #   mt.limitBandwidth($c, "guest-wifi", "192.168.90.0/24", "5M", "20M");

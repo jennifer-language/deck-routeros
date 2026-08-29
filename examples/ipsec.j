@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * ipsec example - IPsec site-to-site tunnels.
@@ -27,10 +28,16 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def live as list of mt.IpsecActivePeer init mt.ipsecActive($c);
-if (len($live) == 0) { io.printf("no active IPsec peers\n"); }
-for (def a in $live) { io.printf("ipsec %s: %s (up %s)\n", $a.remoteAddress, $a.state, $a.uptime); }
+if (len($live) == 0) {
+    io.printf("no active IPsec peers\n");
+}
+for (def a in $live) {
+    io.printf("ipsec %s: %s (up %s)\n", $a.remoteAddress, $a.state, $a.uptime);
+}
 def pols as list of mt.IpsecPolicy init mt.ipsecPolicies($c);
-for (def p in $pols) { io.printf("policy %s -> %s active=%t\n", $p.srcAddress, $p.dstAddress, $p.active); }
+for (def p in $pols) {
+    io.printf("policy %s -> %s active=%t\n", $p.srcAddress, $p.dstAddress, $p.active);
+}
 
 #   mt.setupIpsecTunnel($c, "tobranch", "203.0.113.99",
 #       "a long random shared secret", "192.168.10.0/24", "192.168.20.0/24");

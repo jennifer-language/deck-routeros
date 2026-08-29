@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - ethernet ports: speed, duplex, MTU, PoE, link state.
 # Spliced into routeros.j via include - not a standalone module.
@@ -8,7 +9,12 @@
 export def const ETHERNET_PATH as string init "/interface/ethernet";
 
 def const ETHERNET_SPEEDS as list of string init [
-    "10Mbps", "100Mbps", "1Gbps", "2.5Gbps", "5Gbps", "10Gbps"
+    "10Mbps",
+    "100Mbps",
+    "1Gbps",
+    "2.5Gbps",
+    "5Gbps",
+    "10Gbps"
 ];
 
 def const POE_MODES as list of string init ["auto-on", "forced-on", "off"];
@@ -113,8 +119,10 @@ export func ethernetPortByName(c as Client, name as string) {
  */
 export func linkStatus(c as Client, name as string) {
     requiredId($c, ETHERNET_PATH, $name, "ethernet port");
-    def rows as list of map of string to string init apiTalk($c,
-        ETHERNET_PATH + "/monitor", {"numbers": $name, "once": ""});
+    def rows as list of map of string to string init apiTalk(
+        $c,
+        ETHERNET_PATH + "/monitor",
+        {"numbers": $name, "once": ""});
     return linkStatusFromRow(mergeRows($rows));
 }
 
@@ -136,11 +144,11 @@ export func linkStatus(c as Client, name as string) {
  */
 export func forceEthernetLink(c as Client, name as string, speed as string, fullDuplex as bool) {
     ensureEthernetSpeed($speed);
-    set($c, ETHERNET_PATH, requiredId($c, ETHERNET_PATH, $name, "ethernet port"), {
-        "auto-negotiation": "no",
-        "speed": $speed,
-        "full-duplex": boolWord($fullDuplex)
-    });
+    set(
+        $c,
+        ETHERNET_PATH,
+        requiredId($c, ETHERNET_PATH, $name, "ethernet port"),
+        {"auto-negotiation": "no", "speed": $speed, "full-duplex": boolWord($fullDuplex)});
 }
 
 /**
@@ -151,7 +159,10 @@ export func forceEthernetLink(c as Client, name as string, speed as string, full
  * @throws {Error} kind "routeros" when no ethernet port has that name
  */
 export func autoNegotiateEthernet(c as Client, name as string) {
-    set($c, ETHERNET_PATH, requiredId($c, ETHERNET_PATH, $name, "ethernet port"),
+    set(
+        $c,
+        ETHERNET_PATH,
+        requiredId($c, ETHERNET_PATH, $name, "ethernet port"),
         {"auto-negotiation": "yes"});
 }
 
@@ -170,7 +181,10 @@ export func autoNegotiateEthernet(c as Client, name as string) {
  */
 export func setEthernetMtu(c as Client, name as string, mtu as int) {
     ensureMtu($mtu);
-    set($c, ETHERNET_PATH, requiredId($c, ETHERNET_PATH, $name, "ethernet port"),
+    set(
+        $c,
+        ETHERNET_PATH,
+        requiredId($c, ETHERNET_PATH, $name, "ethernet port"),
         {"mtu": convert.toString($mtu)});
 }
 
@@ -212,7 +226,8 @@ export func setPoe(c as Client, name as string, mode as string) {
  */
 func ensureEthernetSpeed(speed as string) {
     if (not lists.contains(ETHERNET_SPEEDS, $speed)) {
-        raiseError("unknown speed \"" + $speed + "\" - use one of: " + strings.join(ETHERNET_SPEEDS, ", "));
+        raiseError("unknown speed \"" + $speed + "\" - use one of: " +
+            strings.join(ETHERNET_SPEEDS, ", "));
     }
 }
 
@@ -225,7 +240,8 @@ func ensureEthernetSpeed(speed as string) {
  */
 func ensurePoeMode(mode as string) {
     if (not lists.contains(POE_MODES, $mode)) {
-        raiseError("unknown PoE mode \"" + $mode + "\" - use one of: " + strings.join(POE_MODES, ", "));
+        raiseError("unknown PoE mode \"" + $mode + "\" - use one of: " +
+            strings.join(POE_MODES, ", "));
     }
 }
 

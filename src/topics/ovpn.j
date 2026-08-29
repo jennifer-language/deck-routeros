@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - OpenVPN: the cross-platform remote-access VPN.
 # Spliced into routeros.j via include - not a standalone module.
@@ -79,12 +80,15 @@ export func ovpnServerStatus(c as Client) {
 export func enableOvpnServer(c as Client, certificate as string, port as int) {
     ensurePort($port);
     requiredId($c, CERTIFICATE_PATH, $certificate, "certificate");
-    apiRun($c, OVPN_SERVER_PATH + "/set", {
-        "enabled": "yes",
-        "certificate": $certificate,
-        "port": convert.toString($port),
-        "mode": "ip"
-    });
+    apiRun(
+        $c,
+        OVPN_SERVER_PATH + "/set",
+        {
+            "enabled": "yes",
+            "certificate": $certificate,
+            "port": convert.toString($port),
+            "mode": "ip"
+        });
     ensureInputAccept($c, "ovpn: server", {"protocol": "tcp", "dst-port": convert.toString($port)});
 }
 
@@ -124,9 +128,22 @@ export func ovpnClients(c as Client) {
  * @return {string} the RouterOS id of the (new or existing) client
  * @throws {Error} kind "routeros" on bad input
  */
-export func addOvpnClient(c as Client, name as string, serverAddress as string, user as string, password as string) {
+export func addOvpnClient(
+    c as Client,
+    name as string,
+    serverAddress as string,
+    user as string,
+    password as string) {
     def none as map of string to string init {};
-    return vpnClientAdd($c, OVPN_CLIENT_PATH, "OpenVPN", $name, $serverAddress, $user, $password, $none);
+    return vpnClientAdd(
+        $c,
+        OVPN_CLIENT_PATH,
+        "OpenVPN",
+        $name,
+        $serverAddress,
+        $user,
+        $password,
+        $none);
 }
 
 /**

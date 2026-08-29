@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * raw example - firewall raw rules (pre-conntrack drop / notrack).
@@ -28,8 +29,13 @@ def c as mt.Client init mt.connect($host, $user, $password);
 
 def rules as list of mt.RawRule init mt.rawRules($c);
 for (def r in $rules) {
-    io.printf("raw %s/%s src=%s list=%s %s\n",
-        $r.chain, $r.action, $r.srcAddress, $r.srcAddressList, $r.comment);
+    io.printf(
+        "raw %s/%s src=%s list=%s %s\n",
+        $r.chain,
+        $r.action,
+        $r.srcAddress,
+        $r.srcAddressList,
+        $r.comment);
 }
 
 # Drop a bogon/blocklist early, at the cheapest point:

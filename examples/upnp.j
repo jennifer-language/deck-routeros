@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * upnp example - UPnP (LAN devices open their own port forwards).
@@ -29,7 +30,9 @@ def c as mt.Client init mt.connect($host, $user, $password);
 def s as mt.UpnpSettings init mt.upnpStatus($c);
 io.printf("upnp enabled=%t\n", $s.enabled);
 def ifs as list of mt.UpnpInterface init mt.upnpInterfaces($c);
-for (def i in $ifs) { io.printf("  %s: %s\n", $i.interfaceName, $i.role); }
+for (def i in $ifs) {
+    io.printf("  %s: %s\n", $i.interfaceName, $i.role);
+}
 
 # Enable (weigh the security cost - any LAN device can open a hole):
 #   mt.enableUpnp($c);

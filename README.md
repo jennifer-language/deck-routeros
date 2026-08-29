@@ -1,5 +1,9 @@
 # routeros
 
+[![test](https://github.com/jennifer-language/deck-routeros/actions/workflows/test.yml/badge.svg)](https://github.com/jennifer-language/deck-routeros/actions/workflows/test.yml)
+[![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://jennifer-language.github.io/deck-routeros/)
+[![release](https://img.shields.io/github/v/release/jennifer-language/deck-routeros)](https://github.com/jennifer-language/deck-routeros/releases/latest)
+
 A **thick layer over the MikroTik RouterOS API** for the
 [Jennifer](https://jennifer-lang.dev/) language.
 
@@ -13,7 +17,7 @@ the wire; every failure is an `Error{kind: "routeros"}` (or
 ## Usage
 
 ```jennifer
-import "./src/routeros.j" as mt;
+import "@jennifer/routeros/" as mt;
 
 def c as mt.Client init mt.connect("192.168.88.1", "admin", "secret");
 
@@ -46,10 +50,10 @@ See [`examples/`](examples/) for one runnable example per topic, e.g.
 
 ## Documentation
 
-- [docs/cheatsheet.md](docs/cheatsheet.md) — the full API surface, project layout, tests, requirements
-- [docs/README.md](docs/README.md) — per-topic guides with background and worked examples
-- [examples/](examples/) — one runnable, read-only example per topic (`examples/<topic>.j`)
-- [RouterOS documentation](https://help.mikrotik.com/docs/) — MikroTik's official reference for
+- [docs/cheatsheet.md](docs/cheatsheet.md) - the full API surface, project layout, tests, requirements
+- [docs/index.md](docs/index.md) - per-topic guides with background and worked examples
+- [examples/](examples/) - one runnable, read-only example per topic (`examples/<topic>.j`)
+- [RouterOS documentation](https://help.mikrotik.com/docs/) - MikroTik's official reference for
   everything behind the paths this module wraps
 
 ## Disclaimer
@@ -57,12 +61,12 @@ See [`examples/`](examples/) for one runnable example per topic, e.g.
 MikroTik and RouterOS are trademarks of SIA Mikrotīkls. This project is
 an independent, community-written client library; it is **not
 affiliated with, endorsed, or supported by SIA Mikrotīkls**. It
-configures live network equipment — review what a call does before
+configures live network equipment - review what a call does before
 pointing it at production hardware. **Use at your own risk**; no
 warranty of any kind.
 
 ## License
 
-Licensed under the **GNU LGPL v3.0 only** — see [LICENSE.md](LICENSE.md).
+Licensed under the **GNU LGPL v3.0 only** - see [LICENSE](LICENSE).
 Copyright © 2026 mplx &lt;jennifer@mplx.dev&gt;. Every source file carries
 an `SPDX-License-Identifier: LGPL-3.0-only` header.

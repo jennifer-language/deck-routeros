@@ -1,16 +1,13 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the health topic.
 # Spliced into routeros_test.j via include - run with:
 #   jennifer test src/routeros_test.j
 
 func testHealthSensorFromRow() {
-    def row as map of string to string init {
-        "name": "cpu-temperature",
-        "value": "47",
-        "type": "C"
-    };
+    def row as map of string to string init {"name": "cpu-temperature", "value": "47", "type": "C"};
     def s as HealthSensor init healthSensorFromRow($row);
     testing.assertEqual($s.name, "cpu-temperature");
     testing.assertEqual($s.value, "47");

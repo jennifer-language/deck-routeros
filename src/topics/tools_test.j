@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - white-box tests for the tools topic.
 # Spliced into routeros_test.j via include - run with:
@@ -75,8 +76,15 @@ func testPingResultFromMergedProgressRows() {
     def rows as list of map of string to string init [
         {"host": "1.1.1.1", "seq": "0", "time": "2ms"},
         {"host": "1.1.1.1", "seq": "1", "time": "3ms"},
-        {"host": "1.1.1.1", "sent": "2", "received": "2", "packet-loss": "0",
-         "min-rtt": "2ms", "avg-rtt": "2ms500us", "max-rtt": "3ms"}
+        {
+            "host": "1.1.1.1",
+            "sent": "2",
+            "received": "2",
+            "packet-loss": "0",
+            "min-rtt": "2ms",
+            "avg-rtt": "2ms500us",
+            "max-rtt": "3ms"
+        }
     ];
     def p as PingResult init pingResultFromRow(mergeRows($rows));
     testing.assertEqual($p.sent, 2);
@@ -171,8 +179,12 @@ func testModernTlsWordFoldsLegacyReadings() {
 }
 
 func testEmailTlsRoundTripsThroughLegacySpelling() {
-    testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_STARTTLS, "start-tls")), EMAIL_TLS_STARTTLS);
-    testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_IMPLICIT, "start-tls")), EMAIL_TLS_IMPLICIT);
+    testing.assertEqual(
+        modernTlsWord(emailTlsWord(EMAIL_TLS_STARTTLS, "start-tls")),
+        EMAIL_TLS_STARTTLS);
+    testing.assertEqual(
+        modernTlsWord(emailTlsWord(EMAIL_TLS_IMPLICIT, "start-tls")),
+        EMAIL_TLS_IMPLICIT);
     testing.assertEqual(modernTlsWord(emailTlsWord(EMAIL_TLS_NONE, "start-tls")), EMAIL_TLS_NONE);
 }
 

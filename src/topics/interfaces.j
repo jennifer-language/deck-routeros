@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - network interfaces.
 # Spliced into routeros.j via include - not a standalone module.
@@ -105,7 +106,11 @@ export func renameInterface(c as Client, current as string, next as string) {
  * @throws {Error} kind "routeros" when no interface has that name
  */
 export func commentInterface(c as Client, name as string, comment as string) {
-    set($c, INTERFACE_PATH, requiredId($c, INTERFACE_PATH, $name, "interface"), {"comment": $comment});
+    set(
+        $c,
+        INTERFACE_PATH,
+        requiredId($c, INTERFACE_PATH, $name, "interface"),
+        {"comment": $comment});
 }
 
 /**

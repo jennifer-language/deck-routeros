@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * vrrp example - VRRP gateway redundancy.
@@ -27,10 +28,15 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def vrrps as list of mt.VrrpInterface init mt.vrrpInterfaces($c);
-if (len($vrrps) == 0) { io.printf("no VRRP configured\n"); }
+if (len($vrrps) == 0) {
+    io.printf("no VRRP configured\n");
+}
 for (def v in $vrrps) {
-    if ($v.master) { io.printf("vrrp %s: MASTER for vrid %d on %s\n", $v.name, $v.vrid, $v.interfaceName); }
-    else { io.printf("vrrp %s: backup (priority %d)\n", $v.name, $v.priority); }
+    if ($v.master) {
+        io.printf("vrrp %s: MASTER for vrid %d on %s\n", $v.name, $v.vrid, $v.interfaceName);
+    } else {
+        io.printf("vrrp %s: backup (priority %d)\n", $v.name, $v.priority);
+    }
 }
 
 #   mt.setupVrrp($c, "vrrplan", "brlan", 10, 200, "192.168.88.254/32");

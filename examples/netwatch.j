@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * netwatch example - continuous host monitoring.
@@ -27,7 +28,9 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def watches as list of mt.NetwatchHost init mt.netwatchHosts($c);
-for (def n in $watches) { io.printf("netwatch %s (%s): %s since %s\n", $n.host, $n.comment, $n.status, $n.since); }
+for (def n in $watches) {
+    io.printf("netwatch %s (%s): %s since %s\n", $n.host, $n.comment, $n.status, $n.since);
+}
 def down as list of mt.NetwatchHost init mt.downHosts($c);
 io.printf("%d watched hosts are down\n", len($down));
 

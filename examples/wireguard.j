@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * wireguard example - WireGuard VPN tunnels.
@@ -32,7 +33,11 @@ for (def wg in $wgs) {
 }
 def peers as list of mt.WireguardPeer init mt.wireguardPeers($c);
 for (def p in $peers) {
-    io.printf("  peer %s: allowed %s, handshake %s\n", $p.comment, $p.allowedAddress, $p.lastHandshake);
+    io.printf(
+        "  peer %s: allowed %s, handshake %s\n",
+        $p.comment,
+        $p.allowedAddress,
+        $p.lastHandshake);
 }
 
 #   mt.setupWireguardServer($c, "wgvpn", 13231, "10.100.0.1/24");

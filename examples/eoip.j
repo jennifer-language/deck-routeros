@@ -1,6 +1,7 @@
 #!/usr/bin/env -S jennifer run
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 /**
  * eoip example - EoIP layer-2 tunnels.
@@ -27,9 +28,16 @@ if ($host == "" or $user == "") {
 def c as mt.Client init mt.connect($host, $user, $password);
 
 def tunnels as list of mt.EoipTunnel init mt.eoipTunnels($c);
-if (len($tunnels) == 0) { io.printf("no EoIP tunnels\n"); }
+if (len($tunnels) == 0) {
+    io.printf("no EoIP tunnels\n");
+}
 for (def t in $tunnels) {
-    io.printf("eoip %s -> %s (id %d) running=%t\n", $t.name, $t.remoteAddress, $t.tunnelId, $t.running);
+    io.printf(
+        "eoip %s -> %s (id %d) running=%t\n",
+        $t.name,
+        $t.remoteAddress,
+        $t.tunnelId,
+        $t.running);
 }
 
 #   mt.addEoipTunnel($c, "eoipbranch", "10.100.0.2", 7);

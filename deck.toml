@@ -1,0 +1,20 @@
+[package]
+name = "@jennifer/routeros"
+version = "0.1.0"
+description = "A thick, friendly layer over the MikroTik RouterOS API"
+license = "LGPL-3.0-only"
+authors = ["mplx <jennifer@mplx.dev>"]
+# The deck drives a router over the RouterOS binary API, so it opens sockets.
+# No `exec`: it shells out to nothing. No `sql`.
+capabilities = ["net"]
+keywords = ["routeros", "mikrotik", "network", "router", "api"]
+
+[package.urls]
+deck = "https://raw.githubusercontent.com/jennifer-language/deck-routeros/main/deck.toml"
+homepage = "https://github.com/jennifer-language/deck-routeros"
+manual = "https://jennifer-language.github.io/deck-routeros/"
+
+# Only the default binary. The deck talks to a router over a socket, which the
+# constrained build has no capability for.
+[engines]
+jennifer = ">=0.25.0"

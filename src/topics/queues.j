@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# SPDX-FileCopyrightText: 2026 mplx <jennifer@mplx.dev>
+# SPDX-FileCopyrightText: Copyright (C) 2026 mplx <jennifer@mplx.dev>
+# pragma-jennifer-version: >=0.25.0
 
 # routeros - simple queues: bandwidth limiting.
 # Spliced into routeros.j via include - not a standalone module.
@@ -76,7 +77,12 @@ export func simpleQueues(c as Client) {
  * @example
  *   mt.limitBandwidth($c, "guest-wifi", "192.168.90.0/24", "5M", "20M");
  */
-export func limitBandwidth(c as Client, name as string, target as string, upload as string, download as string) {
+export func limitBandwidth(
+    c as Client,
+    name as string,
+    target as string,
+    upload as string,
+    download as string) {
     ensureName($name, "queue");
     def tgt as string init normalizedQueueTarget($c, $target);
     def maxLimit as string init normalizedRate($upload) + "/" + normalizedRate($download);
@@ -94,7 +100,11 @@ export func limitBandwidth(c as Client, name as string, target as string, upload
  */
 export func setBandwidthLimit(c as Client, name as string, upload as string, download as string) {
     def maxLimit as string init normalizedRate($upload) + "/" + normalizedRate($download);
-    set($c, QUEUE_SIMPLE_PATH, requiredId($c, QUEUE_SIMPLE_PATH, $name, "simple queue"), {"max-limit": $maxLimit});
+    set(
+        $c,
+        QUEUE_SIMPLE_PATH,
+        requiredId($c, QUEUE_SIMPLE_PATH, $name, "simple queue"),
+        {"max-limit": $maxLimit});
 }
 
 /**
@@ -154,7 +164,8 @@ func normalizedRate(rate as string) {
     for (def ch in $chars) {
         if (strings.contains(DIGIT_CHARS, $ch)) {
             if ($suffix != "") {
-                raiseError("\"" + $rate + "\" is not a rate - digits must come before the k/M/G suffix");
+                raiseError("\"" + $rate +
+                    "\" is not a rate - digits must come before the k/M/G suffix");
             }
             $digits = $digits + $ch;
         } elseif (strings.contains(RATE_SUFFIX_CHARS, $ch)) {
@@ -340,8 +351,7 @@ export func addQueueTreeRoot(c as Client, name as string, parent as string, maxL
     if ($existing != "") {
         return $existing;
     }
-    return add($c, QUEUE_TREE_PATH,
-        {"name": $name, "parent": $target, "max-limit": $ceiling});
+    return add($c, QUEUE_TREE_PATH, {"name": $name, "parent": $target, "max-limit": $ceiling});
 }
 
 /**
@@ -368,17 +378,26 @@ export func addQueueTreeRoot(c as Client, name as string, parent as string, maxL
  *   mt.addQueueTreeChild($c, "qosupvoip", "qosup", "voip", "5M", "38M", 1);
  *   mt.addQueueTreeChild($c, "qosuprest", "qosup", "bulk", "10M", "38M", 8);
  */
-export func addQueueTreeChild(c as Client, name as string, parentName as string, packetMark as string, limitAt as string, maxLimit as string, priority as int) {
+export func addQueueTreeChild(
+    c as Client,
+    name as string,
+    parentName as string,
+    packetMark as string,
+    limitAt as string,
+    maxLimit as string,
+    priority as int) {
     ensureName($name, "queue tree node");
     ensureName($packetMark, "packet mark");
     ensureTreePriority($priority);
     requiredId($c, QUEUE_TREE_PATH, $parentName, "queue tree node");
     def mangleRows as list of map of string to string init getAll($c, MANGLE_PATH);
-    def marker as map of string to string init
-        findRowByField($mangleRows, "new-packet-mark", $packetMark);
+    def marker as map of string to string init findRowByField(
+        $mangleRows,
+        "new-packet-mark",
+        $packetMark);
     if (len($marker) == 0) {
-        raiseError("no mangle rule creates the packet mark \"" + $packetMark
-            + "\" - set it up first (setupPacketMark)");
+        raiseError("no mangle rule creates the packet mark \"" + $packetMark +
+            "\" - set it up first (setupPacketMark)");
     }
     def guaranteed as string init normalizedRate($limitAt);
     def ceiling as string init normalizedRate($maxLimit);
@@ -386,14 +405,17 @@ export func addQueueTreeChild(c as Client, name as string, parentName as string,
     if ($existing != "") {
         return $existing;
     }
-    return add($c, QUEUE_TREE_PATH, {
-        "name": $name,
-        "parent": $parentName,
-        "packet-mark": $packetMark,
-        "limit-at": $guaranteed,
-        "max-limit": $ceiling,
-        "priority": convert.toString($priority)
-    });
+    return add(
+        $c,
+        QUEUE_TREE_PATH,
+        {
+            "name": $name,
+            "parent": $parentName,
+            "packet-mark": $packetMark,
+            "limit-at": $guaranteed,
+            "max-limit": $ceiling,
+            "priority": convert.toString($priority)
+        });
 }
 
 /**
@@ -467,9 +489,8 @@ func treeQueueFamily(rows as list of map of string to string, name as string) {
         $grew = false;
         for (def row in $rows) {
             def rowName as string init rowValue($row, "name");
-            if ($rowName != ""
-                    and lists.contains($names, rowValue($row, "parent"))
-                    and not lists.contains($names, $rowName)) {
+            if ($rowName != "" and lists.contains($names, rowValue($row, "parent")) and
+                not lists.contains($names, $rowName)) {
                 $names[] = $rowName;
                 $grew = true;
             }
